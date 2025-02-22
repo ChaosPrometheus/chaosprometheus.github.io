@@ -3,248 +3,53 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ТВ Каналы</title>
-    <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
+    <title>IPTV Подключение</title>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #111;
-            color: white;
-            text-align: center;
-            margin: 0;
-            padding: 0;
-            overflow: hidden;
-        }
-        #particles-js {
-            position: fixed;
-            width: 100%;
-            height: 100%;
-            top: 0;
-            left: 0;
-            z-index: -1;
-        }
-        .container {
-            max-width: 1200px;
-            margin: 20px auto;
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
-        }
-        .category {
-            background: rgba(255, 255, 255, 0.1);
-            margin: 10px;
-            padding: 15px;
-            border-radius: 10px;
-            transition: transform 0.3s, background 0.3s;
-            cursor: pointer;
-        }
-        .category:hover {
-            transform: scale(1.1);
-            background: rgba(255, 255, 255, 0.2);
-        }
-        .nav {
-            display: flex;
-            justify-content: center;
-            gap: 20px;
-            background: rgba(255, 255, 255, 0.2);
-            padding: 15px;
-        }
-        .nav a {
-            color: white;
-            text-decoration: none;
-            font-size: 18px;
-            transition: color 0.3s;
-        }
-        .nav a:hover {
-            color: #f39c12;
-        }
-        .modal {
-            display: none;
-            position: fixed;
-            z-index: 1;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.5);
-        }
-        .modal-content {
-            background-color: #222;
-            margin: 15% auto;
-            padding: 20px;
-            border: 1px solid #888;
-            width: 50%;
-            color: white;
-        }
-        .close {
-            color: #aaa;
-            float: right;
-            font-size: 28px;
-            font-weight: bold;
-        }
-        .close:hover,
-        .close:focus {
-            color: white;
-            text-decoration: none;
-            cursor: pointer;
-        }
-        .channel-list {
-            text-align: left;
-            padding: 15px;
-        }
-        .channel-list h3 {
-            margin-bottom: 10px;
-            border-bottom: 2px solid white;
-            display: inline-block;
-        }
-        .channel-list ul {
-            list-style: none;
-            padding: 0;
-        }
-        .channel-list li {
-            padding: 5px 0;
-            transition: transform 0.3s, color 0.3s;
-        }
-        .channel-list li:hover {
-            transform: scale(1.05);
-            color: #f39c12;
+        body { font-family: Arial, sans-serif; margin: 0; padding: 0; background: #f4f4f4; color: #333; }
+        header { background: #222; color: white; padding: 20px; text-align: center; font-size: 1.5em; }
+        .container { width: 95%; max-width: 800px; margin: 20px auto; padding: 20px; background: white; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+        h2, h3 { color: #444; text-align: center; }
+        ul { list-style-type: none; padding: 0; }
+        li { padding: 10px 0; font-size: 1.1em; }
+        .contact { text-align: center; }
+        .contact p { font-size: 1.2em; margin: 10px 0; }
+        .contact a { color: #007BFF; text-decoration: none; font-weight: bold; }
+        .contact a:hover { text-decoration: underline; }
+        @media (max-width: 600px) {
+            header { font-size: 1.3em; padding: 15px; }
+            .container { padding: 15px; }
+            li { font-size: 1em; }
+            .contact p { font-size: 1.1em; }
         }
     </style>
 </head>
 <body>
-    <div id="particles-js"></div>
-    <nav class="nav">
-        <a href="#contact" id="contactBtn">Контакты</a>
-    </nav>
-    <section id="services">
-        <h2>Наши Услуги</h2>
-        <p>Мы предоставляем доступ к широкому выбору ТВ-каналов.</p>
-    </section>
-    <h1>ТВ Каналы</h1>
+    <header>
+        <h1>Подключение IPTV</h1>
+    </header>
+    
     <div class="container">
-        <div class="channel-list">
-            <h3>Общие</h3>
-            <ul>
-                <li>HD +2, +4, +6, +7</li>
-                <li>SD копии HD каналов</li>
-                <li>UHD</li>
-            </ul>
-        </div>
-        <div class="channel-list">
-            <h3>Страны</h3>
-            <ul>
-                <li>Русские</li>
-                <li>Украинские</li>
-                <li>Белорусские</li>
-                <li>Baltic</li>
-                <li>Молдова</li>
-                <li>Uzbekistan</li>
-                <li>Հայկական</li>
-                <li>Казахские</li>
-                <li>Polska</li>
-                <li>Hungary</li>
-                <li>Turkish</li>
-                <li>Georgia</li>
-                <li>Israel</li>
-                <li>Azerbaijan</li>
-                <li>Кыргызстан</li>
-                <li>Czech</li>
-                <li>Deutsch</li>
-                <li>Italy</li>
-                <li>Bulgaria</li>
-                <li>Netherlands</li>
-                <li>Romania</li>
-            </ul>
-        </div>
-        <div class="channel-list">
-            <h3>Категории</h3>
-            <ul>
-                <li>Познавательные</li>
-                <li>Спорт</li>
-                <li>Кино</li>
-                <li>КиноПлюс</li>
-                <li>Разное</li>
-                <li>Детские</li>
-                <li>Музыка</li>
-            </ul>
+        <h2>Каналы</h2>
+        <p>HD +2, +4, +6, +7 | SD копии HD каналов | UHD</p>
+        <ul>
+            <li>Русские</li><li>Украинские</li><li>Белорусские</li><li>Baltic</li><li>Молдова</li>
+            <li>Uzbekistan</li><li>Հայկական</li><li>Казахские</li><li>Polska</li><li>Hungary</li>
+            <li>Turkish</li><li>Georgia</li><li>Israel</li><li>Azerbaijan</li><li>Кыргызстан</li>
+            <li>Czech</li><li>Deutsch</li><li>Italy</li><li>Bulgaria</li><li>Netherlands</li>
+            <li>Romania</li>
+        </ul>
+        
+        <h3>Категории</h3>
+        <ul>
+            <li>Познавательные</li><li>Спорт</li><li>Кино</li><li>КиноПлюс</li>
+            <li>Разное</li><li>Детские</li><li>Музыка</li>
+        </ul>
+        
+        <h2>Контакты</h2>
+        <div class="contact">
+            <p>Telegram: <a href="https://t.me/ChaosPrometheus">@ChaosPrometheus</a></p>
+            <p>WhatsApp: <a href="https://wa.me/77053894339">+77053894339</a></p>
         </div>
     </div>
-    
-    
-    
-    <div id="contactModal" class="modal">
-        <div class="modal-content">
-            <span class="close">&times;</span>
-            <h2>Контакты</h2>
-            <p>Telegram: @ChaosPrometheus</p>
-            <p>WhatsApp: +77053894339</p>
-        </div>
-    </div>
-    
-    <script>
-        particlesJS("particles-js", {
-            particles: {
-                number: { value: 100, density: { enable: true, value_area: 800 } },
-                color: { value: "#ffffff" },
-                shape: {
-                    type: "circle",
-                    stroke: { width: 0, color: "#000000" },
-                    polygon: { nb_sides: 5 }
-                },
-                opacity: { value: 0.5, random: false },
-                size: { value: 3, random: true },
-                line_linked: {
-                    enable: true,
-                    distance: 150,
-                    color: "#ffffff",
-                    opacity: 0.4,
-                    width: 1
-                },
-                move: {
-                    enable: true,
-                    speed: 3,
-                    direction: "none",
-                    random: false,
-                    straight: false,
-                    out_mode: "out",
-                    bounce: false
-                }
-            },
-            interactivity: {
-                detect_on: "canvas",
-                events: {
-                    onhover: { enable: true, mode: "grab" },
-                    onclick: { enable: true, mode: "push" },
-                    resize: true
-                },
-                modes: {
-                    grab: { distance: 140, line_linked: { opacity: 1 } },
-                    bubble: { distance: 400, size: 40, duration: 2, opacity: 8, speed: 3 },
-                    repulse: { distance: 200, duration: 0.4 },
-                    push: { particles_nb: 4 },
-                    remove: { particles_nb: 2 }
-                }
-            },
-            retina_detect: true
-        });
-
-        var modal = document.getElementById("contactModal");
-        var btn = document.getElementById("contactBtn");
-        var span = document.getElementsByClassName("close")[0];
-
-        btn.onclick = function() {
-            modal.style.display = "block";
-        }
-
-        span.onclick = function() {
-            modal.style.display = "none";
-        }
-
-        window.onclick = function(event) {
-            if (event.target == modal) {
-                modal.style.display = "none";
-            }
-        }
-    </script>
 </body>
 </html>
