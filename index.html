@@ -5,51 +5,95 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>IPTV Подключение</title>
     <style>
-        body { font-family: Arial, sans-serif; margin: 0; padding: 0; background: #f4f4f4; color: #333; }
-        header { background: #222; color: white; padding: 20px; text-align: center; font-size: 1.5em; }
-        .container { width: 95%; max-width: 800px; margin: 20px auto; padding: 20px; background: white; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
-        h2, h3 { color: #444; text-align: center; }
-        ul { list-style-type: none; padding: 0; }
-        li { padding: 10px 0; font-size: 1.1em; }
-        .contact { text-align: center; }
-        .contact p { font-size: 1.2em; margin: 10px 0; }
-        .contact a { color: #007BFF; text-decoration: none; font-weight: bold; }
-        .contact a:hover { text-decoration: underline; }
-        @media (max-width: 600px) {
-            header { font-size: 1.3em; padding: 15px; }
-            .container { padding: 15px; }
-            li { font-size: 1em; }
-            .contact p { font-size: 1.1em; }
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f4f4f4;
+            text-align: center;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: auto;
+            background: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            border-radius: 5px;
+            transition: background 0.3s;
+            width: 100%;
+        }
+
+        .btn:hover {
+            background-color: #0056b3;
+        }
+
+        .description {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.5s ease-out, padding 0.5s ease-out;
+            text-align: left;
+            padding: 0 10px;
+        }
+
+        .description.show {
+            max-height: 500px;
+            padding: 15px 10px;
+        }
+
+        .contact {
+            margin-top: 20px;
+            font-size: 18px;
+        }
+
+        .contact a {
+            color: #007bff;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        .contact a:hover {
+            text-decoration: underline;
         }
     </style>
 </head>
 <body>
-    <header>
-        <h1>Подключение IPTV</h1>
-    </header>
-    
+
     <div class="container">
-        <h2>Каналы</h2>
-        <p>HD +2, +4, +6, +7 | SD копии HD каналов | UHD</p>
-        <ul>
-            <li>Русские</li><li>Украинские</li><li>Белорусские</li><li>Baltic</li><li>Молдова</li>
-            <li>Uzbekistan</li><li>Հայկական</li><li>Казахские</li><li>Polska</li><li>Hungary</li>
-            <li>Turkish</li><li>Georgia</li><li>Israel</li><li>Azerbaijan</li><li>Кыргызстан</li>
-            <li>Czech</li><li>Deutsch</li><li>Italy</li><li>Bulgaria</li><li>Netherlands</li>
-            <li>Romania</li>
-        </ul>
-        
-        <h3>Категории</h3>
-        <ul>
-            <li>Познавательные</li><li>Спорт</li><li>Кино</li><li>КиноПлюс</li>
-            <li>Разное</li><li>Детские</li><li>Музыка</li>
-        </ul>
-        
-        <h2>Контакты</h2>
+        <h1>Подключение IPTV</h1>
+        <button class="btn" onclick="toggleDescription()">Подробнее об услуге</button>
+
+        <div id="description" class="description">
+            <p>📺 Подключитесь к телевизору и наслаждайтесь любимыми каналами через Android-приставку, Smart TV или смартфон!</p>
+            <p>📡 Доступны каналы в HD, SD и UHD!</p>
+            <p>🌍 Национальные каналы: Россия, Украина, Беларусь, Казахстан,страны Балтии, Молдова, Узбекистан, Польша и другие.</p>
+            <p>🌎 Международные каналы: Турция, Германия, Италия, Болгария и другие.</p>
+            <p>⚡️ Подключение быстрое и простое – установите приложение на своё устройство и смотрите ТВ где угодно!</p>
+            <p>📦 Также продаю Android-приставки и настраиваю их под ваши нужды.</p>
+        </div>
+
         <div class="contact">
-            <p>Telegram: <a href="https://t.me/ChaosPrometheus">@ChaosPrometheus</a></p>
-            <p>WhatsApp: <a href="https://wa.me/77053894339">+77053894339</a></p>
+            <p>💬 Telegram: <a href="https://t.me/ChaosPrometheus">@ChaosPrometheus</a></p>
+            <p>📱 WhatsApp: <a href="https://wa.me/77053894339">+7 (705) 389-43-39</a></p>
         </div>
     </div>
+
+    <script>
+        function toggleDescription() {
+            var desc = document.getElementById("description");
+            desc.classList.toggle("show");
+        }
+    </script>
+
 </body>
 </html>
