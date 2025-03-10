@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>IPTV Қосу</title>
+    <title>Қызметтер</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -12,7 +12,6 @@
             background-color: #f4f4f4;
             text-align: center;
         }
-
         .container {
             max-width: 600px;
             margin: auto;
@@ -21,7 +20,6 @@
             border-radius: 10px;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
         }
-
         .btn {
             background-color: #007bff;
             color: white;
@@ -34,11 +32,9 @@
             width: 100%;
             margin-bottom: 10px;
         }
-
         .btn:hover {
             background-color: #0056b3;
         }
-
         .description {
             max-height: 0;
             overflow: hidden;
@@ -46,27 +42,22 @@
             text-align: left;
             padding: 0 10px;
         }
-
         .description.show {
             max-height: 500px;
             padding: 15px 10px;
         }
-
         .contact {
             margin-top: 20px;
             font-size: 18px;
         }
-
         .contact a {
             color: #007bff;
             text-decoration: none;
             font-weight: bold;
         }
-
         .contact a:hover {
             text-decoration: underline;
         }
-
         .ads {
             margin-top: 20px;
             padding: 15px;
@@ -83,16 +74,26 @@
 
     <div class="container">
         <button class="btn" onclick="toggleLanguage()">Қазақша / Русский</button>
-        <h1 id="title">IPTV Қосу</h1>
-        <button class="btn" id="toggle-btn" onclick="toggleDescription()">Қызмет туралы толығырақ</button>
+        <h1 id="title">Қызметтер</h1>
 
-        <div id="description" class="description">
-            <p id="desc1">📺 Теледидарға қосылып, Android-қондырғы, Smart TV немесе смартфон арқылы сүйікті арналарыңызды тамашалаңыз!</p>
-            <p id="desc2">📡 HD, SD және UHD арналар қолжетімді!</p>
-            <p id="desc3">🌍 Ұлттық арналары: Қазақстан, Ресей, Украина, Беларусь, Балтық елдері, Молдова, Өзбекстан, Польша және т.б.</p>
-            <p id="desc4">🌎 Халықаралық арналары: Түркия, Германия, Италия, Болгария және т.б.</p>
-            <p id="desc5">⚡️ Жылдам және қарапайым қосылу – құрылғыңызға қолданбаны орнатып, кез келген жерде қараңыз!</p>
-            <p id="desc6">📦 Сонымен қатар, Android-қондырғыларды сатамын және оларды сіздің қажеттіліктеріңізге қарай баптаймын.</p>
+        <button class="btn" onclick="toggleDescription('iptv-desc')"><span id="iptv-title">IPTV қосу</span></button>
+        <div id="iptv-desc" class="description">
+            <p id="iptv-text">📺 Android-қондырғы, Smart TV немесе смартфон арқылы IPTV арналарын тамашалаңыз!</p>
+        </div>
+
+        <button class="btn" onclick="toggleDescription('pc-repair-desc')"><span id="pc-title">Компьютер жөндеу</span></button>
+        <div id="pc-repair-desc" class="description">
+            <p id="pc-text">🛠️ Компьютерлер мен ноутбуктарды жөндеу және техникалық қызмет көрсету.</p>
+        </div>
+
+        <button class="btn" onclick="toggleDescription('print-desc')"><span id="print-title">3D басып шығару</span></button>
+        <div id="print-desc" class="description">
+            <p id="print-text">🖨️ 3D модельдерді жоғары сапада басып шығару.</p>
+        </div>
+
+        <button class="btn" onclick="toggleDescription('arduino-desc')"><span id="arduino-title">Arduino жобаларын әзірлеу</span></button>
+        <div id="arduino-desc" class="description">
+            <p id="arduino-text">🔌 Электроника және Arduino жобаларын құрастыру.</p>
         </div>
 
         <div class="contact">
@@ -109,44 +110,53 @@
     <script>
         let currentLanguage = "kk";
 
-        function toggleDescription() {
-            document.getElementById("description").classList.toggle("show");
+        function toggleDescription(id) {
+            let descriptions = document.querySelectorAll('.description');
+            descriptions.forEach(desc => {
+                if (desc.id !== id) {
+                    desc.classList.remove("show");
+                }
+            });
+            document.getElementById(id).classList.toggle("show");
         }
 
         function toggleLanguage() {
             const translations = {
                 kk: {
-                    title: "IPTV Қосу",
-                    toggleBtn: "Қызмет туралы толығырақ",
-                    desc1: "📺 Теледидарға қосылып, Android-қондырғы, Smart TV немесе смартфон арқылы сүйікті арналарыңызды тамашалаңыз!",
-                    desc2: "📡 HD, SD және UHD арналар қолжетімді!",
-                    desc3: "🌍 Ұлттық арналары: Қазақстан, Ресей, Украина, Беларусь, Балтық елдері, Молдова, Өзбекстан, Польша және т.б.",
-                    desc4: "🌎 Халықаралық арналары: Түркия, Германия, Италия, Болгария және т.б.",
-                    desc5: "⚡️ Жылдам және қарапайым қосылу – құрылғыңызға қолданбаны орнатып, кез келген жерде қараңыз!",
-                    desc6: "📦 Сонымен қатар, Android-қондырғыларды сатамын және оларды сіздің қажеттіліктеріңізге қарай баптаймын."
+                    title: "Қызметтер",
+                    iptv: "IPTV қосу",
+                    iptvText: "📺 Android-қондырғы, Smart TV немесе смартфон арқылы IPTV арналарын тамашалаңыз!",
+                    pc: "Компьютер жөндеу",
+                    pcText: "🛠️ Компьютерлер мен ноутбуктарды жөндеу және техникалық қызмет көрсету.",
+                    print: "3D басып шығару",
+                    printText: "🖨️ 3D модельдерді жоғары сапада басып шығару.",
+                    arduino: "Arduino жобаларын әзірлеу",
+                    arduinoText: "🔌 Электроника және Arduino жобаларын құрастыру."
                 },
                 ru: {
-                    title: "Подключение IPTV",
-                    toggleBtn: "Подробнее об услуге",
-                    desc1: "📺 Подключитесь к телевизору и наслаждайтесь любимыми каналами через Android-приставку, Smart TV или смартфон!",
-                    desc2: "📡 Доступны каналы в HD, SD и UHD!",
-                    desc3: "🌍 Национальные каналы: Россия, Украина, Беларусь, Казахстан, страны Балтии, Молдова, Узбекистан, Польша и другие.",
-                    desc4: "🌎 Международные каналы: Турция, Германия, Италия, Болгария и другие.",
-                    desc5: "⚡️ Подключение быстрое и простое – установите приложение на своё устройство и смотрите ТВ где угодно!",
-                    desc6: "📦 Также продаю Android-приставки и настраиваю их под ваши нужды."
+                    title: "Услуги",
+                    iptv: "Подключение IPTV",
+                    iptvText: "📺 Смотрите IPTV-каналы через Android-приставку, Smart TV или смартфон!",
+                    pc: "Ремонт компьютеров",
+                    pcText: "🛠️ Ремонт и обслуживание компьютеров и ноутбуков.",
+                    print: "3D печать",
+                    printText: "🖨️ Печать 3D-моделей высокого качества.",
+                    arduino: "Проектирование на Arduino",
+                    arduinoText: "🔌 Разработка и сборка проектов на Arduino."
                 }
             };
 
             currentLanguage = currentLanguage === "kk" ? "ru" : "kk";
 
             document.getElementById("title").textContent = translations[currentLanguage].title;
-            document.getElementById("toggle-btn").textContent = translations[currentLanguage].toggleBtn;
-            document.getElementById("desc1").textContent = translations[currentLanguage].desc1;
-            document.getElementById("desc2").textContent = translations[currentLanguage].desc2;
-            document.getElementById("desc3").textContent = translations[currentLanguage].desc3;
-            document.getElementById("desc4").textContent = translations[currentLanguage].desc4;
-            document.getElementById("desc5").textContent = translations[currentLanguage].desc5;
-            document.getElementById("desc6").textContent = translations[currentLanguage].desc6;
+            document.getElementById("iptv-title").textContent = translations[currentLanguage].iptv;
+            document.getElementById("iptv-text").textContent = translations[currentLanguage].iptvText;
+            document.getElementById("pc-title").textContent = translations[currentLanguage].pc;
+            document.getElementById("pc-text").textContent = translations[currentLanguage].pcText;
+            document.getElementById("print-title").textContent = translations[currentLanguage].print;
+            document.getElementById("print-text").textContent = translations[currentLanguage].printText;
+            document.getElementById("arduino-title").textContent = translations[currentLanguage].arduino;
+            document.getElementById("arduino-text").textContent = translations[currentLanguage].arduinoText;
         }
     </script>
 
