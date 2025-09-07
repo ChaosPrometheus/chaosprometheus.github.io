@@ -4,156 +4,120 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Қызметтер</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
     <style>
-        :root {
-            --primary-color: #007bff;
-            --hover-color: #0056b3;
-            --shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-            --transition: all 0.3s ease;
-        }
-
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
-
-        body {
-            font-family: Arial, sans-serif;
-            padding: 20px;
-            background-color: #f4f4f4;
-            line-height: 1.6;
-        }
-
-        .container {
-            max-width: 600px;
-            margin: 0 auto;
-            background: #fff;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: var(--shadow);
-            text-align: center;
-        }
-
-        .btn {
-            background-color: var(--primary-color);
-            color: white;
-            border: none;
-            padding: 10px;
-            font-size: 16px;
-            cursor: pointer;
-            border-radius: 5px;
-            transition: var(--transition);
-            width: 100%;
-            max-width: 400px;
-            margin: 0 auto 10px;
-            display: block;
-        }
-
-        .btn:hover {
-            background-color: var(--hover-color);
-        }
-
         .description {
             max-height: 0;
             overflow: hidden;
             transition: max-height 0.5s ease-out, padding 0.5s ease-out;
-            padding: 0 10px;
-            text-align: left;
         }
-
         .description.show {
-            max-height: 500px;
-            padding: 15px 10px;
+            max-height: 300px;
+            padding: 1rem;
         }
-
-        .contact {
-            margin-top: 20px;
-            font-size: 18px;
-            text-align: center;
+        .btn:hover {
+            transform: translateY(-2px);
         }
-
-        .contact a {
-            color: var(--primary-color);
-            text-decoration: none;
-            font-weight: bold;
-        }
-
-        .contact a:hover {
-            text-decoration: underline;
-        }
-
-        .ads {
-            margin-top: 20px;
-            padding: 15px;
-            background: #ffeeba;
-            border: 1px solid #ffc107;
-            border-radius: 10px;
-            color: #856404;
-            text-align: center;
-        }
-
-        @media (max-width: 480px) {
-            .container {
-                padding: 15px;
-            }
-            .btn {
-                font-size: 14px;
-            }
+        .btn {
+            transition: all 0.3s ease;
         }
     </style>
 </head>
-<body>
-    <div class="container">
-        <button class="btn" id="lang-toggle">Қазақша / Русский</button>
-        <h1 id="title">Қызметтер</h1>
-
-        <button class="btn" data-desc="iptv-desc"><span id="iptv-title">IPTV қосу</span></button>
-        <div id="iptv-desc" class="description">
-            <p id="iptv-text"></p>
+<body class="bg-gray-100 font-sans leading-relaxed">
+    <div class="container max-w-3xl mx-auto bg-white p-6 sm:p-8 rounded-2xl shadow-lg mt-8">
+        <div class="flex justify-between items-center mb-6">
+            <h1 id="title" class="text-3xl sm:text-4xl font-bold text-gray-800">Қызметтер</h1>
+            <button id="lang-toggle" class="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition duration-300">Қазақша / Русский</button>
         </div>
 
-        <button class="btn" data-desc="pc-repair-desc"><span id="pc-title">Компьютер жөндеу</span></button>
-        <div id="pc-repair-desc" class="description">
-            <p id="pc-text"></p>
+        <div class="space-y-4">
+            <div>
+                <button class="btn w-full bg-blue-500 text-white py-3 rounded-lg hover:bg-blue-600 flex items-center justify-center space-x-2" data-desc="iptv-desc">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                    <span id="iptv-title">IPTV қосу</span>
+                </button>
+                <div id="iptv-desc" class="description bg-gray-50 rounded-lg mt-2">
+                    <p id="iptv-text" class="text-gray-700"></p>
+                </div>
+            </div>
+
+            <div>
+                <button class="btn w-full bg-blue-500 text-white py-3 rounded-lg hover:bg-blue-600 flex items-center justify-center space-x-2" data-desc="pc-repair-desc">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path></svg>
+                    <span id="pc-title">Компьютер жөндеу</span>
+                </button>
+                <div id="pc-repair-desc" class="description bg-gray-50 rounded-lg mt-2">
+                    <p id="pc-text" class="text-gray-700"></p>
+                </div>
+            </div>
+
+            <div>
+                <button class="btn w-full bg-blue-500 text-white py-3 rounded-lg hover:bg-blue-600 flex items-center justify-center space-x-2" data-desc="print-desc">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2z"></path></svg>
+                    <span id="print-title">3D басып шығару</span>
+                </button>
+                <div id="print-desc" class="description bg-gray-50 rounded-lg mt-2">
+                    <p id="print-text" class="text-gray-700"></p>
+                </div>
+            </div>
+
+            <div>
+                <button class="btn w-full bg-blue-500 text-white py-3 rounded-lg hover:bg-blue-600 flex items-center justify-center space-x-2" data-desc="arduino-desc">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z"></path></svg>
+                    <span id="arduino-title">Arduino жобаларын әзірлеу</span>
+                </button>
+                <div id="arduino-desc" class="description bg-gray-50 rounded-lg mt-2">
+                    <p id="arduino-text" class="text-gray-700"></p>
+                </div>
+            </div>
+
+            <div>
+                <button class="btn w-full bg-blue-500 text-white py-3 rounded-lg hover:bg-blue-600 flex items-center justify-center space-x-2" data-desc="site-desc">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9"></path></svg>
+                    <span id="site-title">Арнайы веб-сайтты әзірлеу</span>
+                </button>
+                <div id="site-desc" class="description bg-gray-50 rounded-lg mt-2">
+                    <p id="site-text" class="text-gray-700"></p>
+                </div>
+            </div>
+
+            <div>
+                <button class="btn w-full bg-blue-500 text-white py-3 rounded-lg hover:bg-blue-600 flex items-center justify-center space-x-2" data-desc="bot-desc">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5v-4a2 2 0 012-2h10a2 2 0 012 2v4h-4m-2 4h.01M12 20h.01"></path></svg>
+                    <span id="bot-title">Telegram-бот әзірлеу</span>
+                </button>
+                <div id="bot-desc" class="description bg-gray-50 rounded-lg mt-2">
+                    <p id="bot-text" class="text-gray-700"></p>
+                </div>
+            </div>
+
+            <div>
+                <button class="btn w-full bg-blue-500 text-white py-3 rounded-lg hover:bg-blue-600 flex items-center justify-center space-x-2" data-desc="satellite-desc">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
+                    <span id="satellite-title">Спутниктік тарелкаларды орнату</span>
+                </button>
+                <div id="satellite-desc" class="description bg-gray-50 rounded-lg mt-2">
+                    <p id="satellite-text" class="text-gray-700"></p>
+                </div>
+            </div>
+
+            <div>
+                <button class="btn w-full bg-blue-500 text-white py-3 rounded-lg hover:bg-blue-600 flex items-center justify-center space-x-2" data-desc="cctv-desc">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
+                    <span id="cctv-title">Бейнебақылау орнату</span>
+                </button>
+                <div id="cctv-desc" class="description bg-gray-50 rounded-lg mt-2">
+                    <p id="cctv-text" class="text-gray-700"></p>
+                </div>
+            </div>
         </div>
 
-        <button class="btn" data-desc="print-desc"><span id="print-title">3D басып шығару</span></button>
-        <div id="print-desc" class="description">
-            <p id="print-text"></p>
+        <div class="contact mt-8 text-center">
+            <p class="text-lg text-gray-700">💬 Telegram: <a href="https://t.me/ChaosPrometheus" class="text-blue-500 font-semibold hover:underline">@ChaosPrometheus</a></p>
+            <p class="text-lg text-gray-700">📱 WhatsApp: <a href="https://wa.me/77053894339" class="text-blue-500 font-semibold hover:underline">+7 (705) 389-43-39</a></p>
         </div>
 
-        <button class="btn" data-desc="arduino-desc"><span id="arduino-title">Arduino жобаларын әзірлеу</span></button>
-        <div id="arduino-desc" class="description">
-            <p id="arduino-text"></p>
-        </div>
-
-        <button class="btn" data-desc="site-desc"><span id="site-title">Арнайы веб-сайтты әзірлеу</span></button>
-        <div id="site-desc" class="description">
-            <p id="site-text"></p>
-        </div>
-
-        <button class="btn" data-desc="bot-desc"><span id="bot-title">Telegram-бот әзірлеу</span></button>
-        <div id="bot-desc" class="description">
-            <p id="bot-text"></p>
-        </div>
-
-        <button class="btn" data-desc="satellite-desc"><span id="satellite-title">Спутниктік тарелкаларды орнату</span></button>
-        <div id="satellite-desc" class="description">
-            <p id="satellite-text"></p>
-        </div>
-
-        <button class="btn" data-desc="cctv-desc"><span id="cctv-title">Бейнебақылау орнату</span></button>
-        <div id="cctv-desc" class="description">
-            <p id="cctv-text"></p>
-        </div>
-
-        <div class="contact">
-            <p>💬 Telegram: <a href="https://t.me/ChaosPrometheus">@ChaosPrometheus</a></p>
-            <p>📱 WhatsApp: <a href="https://wa.me/77053894339">+7 (705) 389-43-39</a></p>
-        </div>
-
-        <div class="ads">
+        <div class="ads mt-6 p-4 bg-yellow-100 border border-yellow-400 rounded-lg text-center text-yellow-800">
             <p>🔹 Бұл жерде сіздің жарнамаңыз болуы мүмкін!</p>
             <p>🔹 Здесь может быть ваша реклама!</p>
         </div>
