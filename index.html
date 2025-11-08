@@ -345,11 +345,23 @@
                 ✔ Мобильді қосымшалар, кепілдік<br>
                 </p>
             </div>
+
+            <div class="service" id="videotape">
+                <div class="service-icon"><i class="fas fa-film"></i></div>
+                <h2 id="videotape-title"><i class="fas fa-film"></i> Видео кассеталарды цифрлау</h2>
+                <p id="videotape-text">
+                    🎞 <strong>Естеліктеріңізді сақтаңыз!</strong><br>
+                    ✔ VHS, VHS-C, Hi8, MiniDV және басқа форматтар<br>
+                    ✔ Бейне мен дыбысты қалпына келтіру және тазалау<br>
+                    ✔ USB, DVD немесе бұлтқа жазу<br>
+                </p>
+            </div>
+
         </div>
     </div>
 
     <footer>
-        <p><i class="fas fa-heart"></i> © 2025 Керемет Қызметтер | <a href="https://t.me/ChaosPrometheus" style="color: #fff;">Telegram</a></p>
+        <p> © 2025 Қызметтер </p>
     </footer>
 
     <script>
@@ -396,7 +408,11 @@
                     title: '<i class="fas fa-video"></i> Бейнебақылау орнату',
                     text: '🎥 <strong>Қауіпсіздік</strong> үшін IP және аналогтық камералар!<br>✔ Орнату және баптау<br>✔ <span class="highlight">Қашықтан бақылау</span><br>✔ Мобильді қосымшалар, кепілдік<br>',
                     cta: '<i class="fab fa-telegram-plane"></i> Хабарласыңыз'
-                }
+                },
+                videotape: {
+                    title: '<i class="fas fa-film"></i> Видео\nкассеталарды цифрлау',
+                    text: '🎞 <strong>Естеліктеріңізді сақтаңыз!</strong><br>✔ VHS, VHS-C, Hi8, MiniDV және басқа форматтар<br>✔ Бейне мен дыбысты қалпына келтіру және тазалау<br>✔ USB, DVD немесе бұлтқа жазу<br>✔ Жылдам және сапалы қызмет<br>',
+                },
             },
             ru: {
                 title: '<i class="fas fa-tools"></i> Услуги',
@@ -440,7 +456,11 @@
                     title: '<i class="fas fa-video"></i> Установка видеонаблюдения',
                     text: '🎥 <strong>Безопасность</strong> с IP и аналоговыми камерами!<br>✔ Установка и настройка<br>✔ <span class="highlight">Удаленный просмотр</span><br>✔ Мобильные приложения, гарантия<br>',
                     cta: '<i class="fab fa-telegram-plane"></i> Связаться'
-                }
+                },
+                videotape: {
+                    title: '<i class="fas fa-film"></i> Оцифровка видеокассет',
+                    text: '🎬 <strong>Сохраните свои воспоминания!</strong><br>✔ Оцифровка VHS, VHS-C, Hi8, MiniDV и других форматов<br>✔ Восстановление и улучшение качества видео и звука<br>✔ Запись результата на USB, DVD или в облако<br>✔ Быстро, аккуратно и с гарантией качества<br>',
+                },
             }
         };
 
@@ -485,11 +505,10 @@
             document.getElementById('subtitle').innerText = translations[lang].subtitle;
 
             // Обновление услуг
-            const services = ['iptv', 'pc', 'print', 'arduino', 'site', 'bot', 'satellite', 'cctv'];
+            const services = ['iptv', 'pc', 'print', 'arduino', 'site', 'bot', 'satellite', 'cctv','videotape'];
             services.forEach(id => {
                 document.getElementById(`${id}-title`).innerHTML = translations[lang][id].title;
-                document.getElementById(`${id}-text`).innerHTML = translations[lang][id].text + 
-                    `<a href="https://t.me/ChaosPrometheus" class="cta-button" target="_blank" id="${id}-cta">${translations[lang][id].cta}</a>`;
+                document.getElementById(`${id}-text`).innerHTML = translations[lang][id].text;
             });
 
             // Обновление футера
