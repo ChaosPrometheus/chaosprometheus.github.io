@@ -1,105 +1,163 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="kk">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Coffee Shop Sanny A</title>
-  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
-  <style>
-    /* Общие стили */
-    * {margin:0; padding:0; box-sizing:border-box; font-family: 'Roboto', sans-serif;}
-    body {background-color: #fff8f0; color: #333;}
-    a {text-decoration:none; color: inherit;}
-    img {max-width:100%; display:block;}
-    
-    /* Хедер */
-    header {background-color:#6b4f3b; color:white; padding:20px 0; text-align:center;}
-    header h1 {font-size:2.5em;}
-    nav {margin-top:10px;}
-    nav a {margin: 0 15px; font-weight:bold; color:white; transition:0.3s;}
-    nav a:hover {color:#ffd700;}
-    
-    /* Главный баннер */
-    .hero {background: url('https://images.unsplash.com/photo-1509042239860-f550ce710b93?auto=format&fit=crop&w=1350&q=80') center/cover no-repeat; height:80vh; display:flex; align-items:center; justify-content:center; color:white; text-shadow: 2px 2px 8px rgba(0,0,0,0.7);}
-    .hero h2 {font-size:3em; text-align:center;}
-    
-    /* О нас */
-    .about {padding:60px 20px; text-align:center;}
-    .about h2 {font-size:2em; margin-bottom:20px; color:#6b4f3b;}
-    .about p {max-width:700px; margin:0 auto; line-height:1.6; font-size:1.1em;}
-    
-    /* Меню */
-    .menu {background-color:#f7f1e1; padding:60px 20px; text-align:center;}
-    .menu h2 {font-size:2em; margin-bottom:40px; color:#6b4f3b;}
-    .menu-items {display:grid; grid-template-columns:repeat(auto-fit, minmax(200px,1fr)); gap:20px; max-width:1000px; margin:0 auto;}
-    .menu-item {background:white; padding:20px; border-radius:10px; box-shadow:0 4px 10px rgba(0,0,0,0.1);}
-    .menu-item h3 {margin-bottom:10px; color:#6b4f3b;}
-    .menu-item p {font-size:0.95em;}
-    
-    /* Контакты */
-    .contact {padding:60px 20px; text-align:center;}
-    .contact h2 {font-size:2em; margin-bottom:20px; color:#6b4f3b;}
-    .contact p {margin-bottom:10px;}
-    .contact a {color:#6b4f3b; font-weight:bold;}
-    
-    /* Футер */
-    footer {background:#6b4f3b; color:white; text-align:center; padding:20px 0;}
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sanny A - дәмді кофе және жайлы атмосфера</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap');
+        
+        body {
+            margin: 0;
+            font-family: 'Roboto', sans-serif;
+            background: #f8f1e9;
+            color: #3c2f2f;
+            line-height: 1.6;
+        }
+        header {
+            background: url('https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?ixlib=rb-4.0.3&auto=format&fit=crop&q=80') center/cover no-repeat;
+            height: 100vh;
+            color: white;
+            text-align: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+        header::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.55);
+        }
+        .header-content {
+            position: relative;
+            z-index: 2;
+        }
+        h1 { 
+            font-size: 5rem; 
+            margin: 0; 
+            text-shadow: 3px 3px 15px rgba(0,0,0,0.9);
+            letter-spacing: 3px;
+        }
+        h2 { color: #d4a574; text-align: center; padding: 50px 0; font-size: 2.5rem; }
+        .container { max-width: 1100px; margin: 0 auto; padding: 20px; }
+        .menu { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 25px; margin: 40px 0; }
+        .card {
+            background: white;
+            padding: 25px;
+            border-radius: 18px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+            text-align: center;
+            transition: transform 0.3s;
+        }
+        .card:hover { transform: translateY(-10px); }
+        .price { font-size: 1.8rem; color: #b8860b; font-weight: bold; margin-top: 10px; }
+        .features { background: #3c2f2f; color: white; padding: 80px 20px; text-align: center; }
+        .features-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 40px; margin-top: 50px; }
+        footer { background: #2b1f1f; color: #ccc; text-align: center; padding: 50px 20px; }
+        .btn {
+            background: #d4a574;
+            color: white;
+            padding: 18px 40px;
+            border: none;
+            border-radius: 50px;
+            font-size: 1.3rem;
+            cursor: pointer;
+            margin-top: 30px;
+            display: inline-block;
+            text-decoration: none;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+        .btn:hover { background: #b8860b; transform: scale(1.05); transition: 0.3s; }
+    </style>
 </head>
 <body>
 
-  <header>
-    <h1>Sanny A Coffee</h1>
-    <nav>
-      <a href="#about">О нас</a>
-      <a href="#menu">Меню</a>
-      <a href="#contact">Контакты</a>
-    </nav>
-  </header>
+    <header>
+        <div class="header-content">
+            <h1>Sanny A</h1>
+            <p style="font-size:2rem; margin:20px 0;">Дәмді кофе • Жайлы орын • Үлкен теледидар</p>
+            <a href="tel:+77001234567" class="btn">☎ Қоңырау шалу</a>
+        </div>
+    </header>
 
-  <section class="hero">
-    <h2>Лучший кофе в поселке!</h2>
-  </section>
+    <section class="container">
+        <h2>Біздің мәзір</h2>
+        <div class="menu">
+            <div class="card">
+                <h3>Эспрессо</h3>
+                <p>Классикалық қою эспрессо</p>
+                <div class="price">900 ₸</div>
+            </div>
+            <div class="card">
+                <h3>Американо</h3>
+                <p>Үлкен кесе, жеңіл дәм</p>
+                <div class="price">1 000 ₸</div>
+            </div>
+            <div class="card">
+                <h3>Капучино</h3>
+                <p>Кремді көбікпен</p>
+                <div class="price">1 400 ₸</div>
+            </div>
+            <div class="card">
+                <h3>Латте</h3>
+                <p>Көп сүт, нәзік дәм</p>
+                <div class="price">1 500 ₸</div>
+            </div>
+            <div class="card">
+                <h3>Раф ваниль</h3>
+                <p>Тәтті әрі жұмсақ</p>
+                <div class="price">1 700 ₸</div>
+            </div>
+            <div class="card">
+                <h3>Шай (қара/жасыл)</h3>
+                <p>Жапырақты шай, чәйнекте</p>
+                <div class="price">800 ₸</div>
+            </div>
+        </div>
+    </section>
 
-  <section class="about" id="about">
-    <h2>О нас</h2>
-    <p>
-      Кофейня Sanny A — это место, где каждый глоток кофе дарит уют и вдохновение. Мы используем только свежие зерна, заботимся о качестве напитков и создаем атмосферу, в которую хочется возвращаться снова и снова.
-    </p>
-  </section>
+    <section class="features">
+        <div class="container">
+            <h2 style="color:#d4a574;">Sanny A неге келеді?</h2>
+            <div class="features-grid">
+                <div>
+                    <h3>Жайлы креслолар</h3>
+                    <p>Жұмсақ дивандар мен орындықтар – ұзақ отыруға арналған</p>
+                </div>
+                <div>
+                    <h3>Үлкен теледидар</h3>
+                    <p>Яндекс.ТВ: футбол, фильмдер, жаңалықтар</p>
+                </div>
+                <div>
+                    <h3>Тегін Wi-Fi</h3>
+                    <p>Жоғары жылдамдық – жұмысқа да, демалысқа да</p>
+                </div>
+                <div>
+                    <h3>Күні бойы ашық</h3>
+                    <p>08:00 – 00:00, күнде</p>
+                </div>
+            </div>
+        </div>
+    </section>
 
-  <section class="menu" id="menu">
-    <h2>Наше меню</h2>
-    <div class="menu-items">
-      <div class="menu-item">
-        <h3>Эспрессо</h3>
-        <p>Классический крепкий кофе с насыщенным вкусом.</p>
-      </div>
-      <div class="menu-item">
-        <h3>Капучино</h3>
-        <p>Кофе с нежной пенкой и легкой сладостью.</p>
-      </div>
-      <div class="menu-item">
-        <h3>Латте</h3>
-        <p>Мягкий кофе с молоком и нежной кремовой текстурой.</p>
-      </div>
-      <div class="menu-item">
-        <h3>Какао</h3>
-        <p>Горячий шоколад для самых сладких моментов.</p>
-      </div>
-    </div>
-  </section>
+    <section class="container">
+        <h2>Бізді табыңыз</h2>
+        <p style="text-align:center;font-size:1.4rem;">
+            <strong>Sanny A</strong><br>
+            Батыс Қазақстан облысы,Сырым Ауданы,Жымпиты ауылы, Қазақстан көшесі<br>
+            <strong>Жұмыс уақыты:</strong> 08:00 – 00:00 (күнде)<br>
+            <strong>Телефон:</strong> +7 (777) 861-07-92<br>
+        </p>
+        <div style="text-align:center;">
+            <a href="https://maps.app.goo.gl/2x2xJAeHJJTehtbY8" target="_blank" class="btn">Google Maps-та ашу →</a>
+        </div>
+    </section>
 
-  <section class="contact" id="contact">
-    <h2>Контакты</h2>
-    <p>Адрес: с. Жымпиты, </p>
-    <p>Телефон: <a href="tel:+77778610792">+7 777 123 45 67</a></p>
-  </section>
-
-  <footer>
-    &copy; 2025 Sanny A Coffee.
-  </footer>
+    <footer>
+        <p>&copy; 2025 Sanny A</p>
+    </footer>
 
 </body>
 </html>
-
