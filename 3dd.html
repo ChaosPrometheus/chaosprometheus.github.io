@@ -74,7 +74,6 @@ L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
 
 let markers = L.layerGroup().addTo(map);
 
-// Загрузка всех точек на карту
 function loadAllMarkers() {
   markers.clearLayers();
   db.collection("3dpoints").get().then(snapshot => {
@@ -86,7 +85,6 @@ function loadAllMarkers() {
   });
 }
 
-// Загрузка точек текущего пользователя в сайдбар
 function loadUserPoints(uid) {
   userPointsDiv.innerHTML = '';
   db.collection("3dpoints").where("uid", "==", uid).get().then(snapshot => {
@@ -102,7 +100,6 @@ function loadUserPoints(uid) {
   });
 }
 
-// Редактирование точки
 window.editPoint = (id) => {
   const docRef = db.collection("3dpoints").doc(id);
   docRef.get().then(doc => {
@@ -120,7 +117,6 @@ window.editPoint = (id) => {
   });
 }
 
-// Удаление точки
 window.deletePoint = (id) => {
   if(confirm("Удалить эту точку?")) {
     db.collection("3dpoints").doc(id).delete().then(() => {
@@ -131,7 +127,6 @@ window.deletePoint = (id) => {
   }
 }
 
-// Вход через Google
 googleBtn.onclick = () => {
   const provider = new firebase.auth.GoogleAuthProvider();
   auth.signInWithPopup(provider).then(result => {
@@ -146,10 +141,8 @@ googleBtn.onclick = () => {
   }).catch(err => alert(err.message));
 };
 
-// Выход
 logoutBtn.onclick = () => auth.signOut();
 
-// Слежение за авторизацией
 auth.onAuthStateChanged(user => {
   if (user) {
     loginForm.classList.add('hidden');
@@ -168,19 +161,15 @@ auth.onAuthStateChanged(user => {
   loadAllMarkers(); // ВСЕГДА показываем все точки
 });
 
-// Добавление новой точки
 addMarkerBtn.onclick = () => {
-  if (!auth.currentUser) {
+  if(!auth.currentUser){
     alert("Сначала войдите в аккаунт!");
     return;
   }
-
-  alert("Кликните на карте, где находится ваш 3D-принтер");
-
-  const addClickHandler = (e) => {
+  alert("Кликни на карте, где находится твой 3D-принтер");
+  map.once('click', e => {
     const lat = e.latlng.lat;
     const lng = e.latlng.lng;
-
     const name = prompt("Название студии / имя");
     const address = prompt("Адрес");
     const phone = prompt("Телефон (не обязательно)", "");
@@ -197,11 +186,7 @@ addMarkerBtn.onclick = () => {
         loadUserPoints(auth.currentUser.uid);
       });
     }
-
-    map.off('click', addClickHandler); // удаляем обработчик после добавления
-  };
-
-  map.on('click', addClickHandler);
+  });
 };
 </script>
 
