@@ -99,7 +99,7 @@
         L.marker([d.lat, d.lng]).addTo(markers)
           .bindPopup(`<b>${d.name}</b><br>${d.address}<br>${d.phone || ''}`);
       });
-    });
+    }).catch(err => console.error("Ошибка загрузки маркеров:", err));
   }
 
   // Загрузка маркеров текущего пользователя
@@ -115,7 +115,7 @@
           <button onclick="deletePoint('${doc.id}')">Удалить</button>`;
         userPointsDiv.appendChild(div);
       });
-    });
+    }).catch(err => console.error("Ошибка загрузки своих точек:", err));
   }
 
   // Редактирование точки
@@ -131,7 +131,7 @@
           alert("Точка обновлена!");
           loadAllMarkers();
           if(auth.currentUser) loadUserPoints(auth.currentUser.uid);
-        });
+        }).catch(err => console.error("Ошибка обновления точки:", err));
       }
     });
   }
@@ -143,7 +143,7 @@
         alert("Точка удалена!");
         loadAllMarkers();
         if(auth.currentUser) loadUserPoints(auth.currentUser.uid);
-      });
+      }).catch(err => console.error("Ошибка удаления точки:", err));
     }
   }
 
@@ -158,7 +158,7 @@
         email: user.email,
         photo: user.photoURL,
         created: firebase.firestore.FieldValue.serverTimestamp()
-      }, { merge: true });
+      }, { merge: true }).catch(err => console.error("Ошибка сохранения пользователя:", err));
     }).catch(err => alert(err.message));
   };
 
@@ -175,18 +175,23 @@
         <div><b>${user.displayName}</b></div>
         <div style="font-size:12px;color:#666">${user.email}</div>
       `;
-      loadAllMarkers();
       loadUserPoints(user.uid);
     } else {
       loginForm.classList.remove('hidden');
       userPanel.classList.add('hidden');
-      markers.clearLayers();
       userPointsDiv.innerHTML = '';
     }
+
+    // ВСЕГДА загружаем все точки на карту
+    loadAllMarkers();
   });
 
   // Добавление точки
   addMarkerBtn.onclick = () => {
+    if(!auth.currentUser){
+      alert("Сначала войдите в аккаунт!");
+      return;
+    }
     alert("Кликни на карте, где находится твой 3D-принтер");
 
     map.once('click', e => {
@@ -196,7 +201,7 @@
       const address = prompt("Адрес");
       const phone = prompt("Телефон (не обязательно)", "");
 
-      if (name && address && auth.currentUser) {
+      if (name && address) {
         db.collection("3dpoints").add({
           name, address, phone,
           lat, lng,
