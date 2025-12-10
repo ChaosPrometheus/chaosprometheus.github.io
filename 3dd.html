@@ -1,37 +1,25 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>3D-печать в Казахстане</title>
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-  <style>
-    body { margin:0; font-family: Arial, sans-serif; }
-    #map { height: 100vh; width: 100%; }
-
-    #auth-panel {
-      position: absolute; top: 10px; right: 10px; background: white;
-      padding: 15px; border-radius: 8px; box-shadow: 0 0 15px rgba(0,0,0,0.3);
-      z-index: 1000; width: 300px;
-    }
-
-    button { width: 100%; padding: 10px; margin: 5px 0; border-radius: 5px; border: none;
-      background:#0066ff; color:white; font-weight:bold; cursor:pointer; }
-    button:hover { background:#0050cc; }
-
-    #logout-btn { background:#d33; }
-    #add-marker-btn { background:#00c853; }
-
-    #user-info { text-align:center; }
-    #user-info img { border-radius: 50%; margin-bottom: 10px; }
-
-    #user-points { margin-top: 10px; max-height: 250px; overflow-y:auto; font-size: 14px; }
-
-    .point-item { border-bottom: 1px solid #ddd; padding: 5px; }
-    .point-item button { width:auto; margin-left:5px; padding:3px 6px; font-size:12px; }
-
-    .hidden { display:none; }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>3D-печать в Казахстане</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<style>
+  body { margin:0; font-family: Arial, sans-serif; }
+  #map { height: 100vh; width: 100%; }
+  #auth-panel { position: absolute; top: 10px; right: 10px; background: white; padding: 15px; border-radius: 8px; box-shadow: 0 0 15px rgba(0,0,0,0.3); z-index: 1000; width: 300px; }
+  button { width: 100%; padding: 10px; margin: 5px 0; border-radius: 5px; border: none; background:#0066ff; color:white; font-weight:bold; cursor:pointer; }
+  button:hover { background:#0050cc; }
+  #logout-btn { background:#d33; }
+  #add-marker-btn { background:#00c853; }
+  #user-info { text-align:center; }
+  #user-info img { border-radius: 50%; margin-bottom: 10px; }
+  #user-points { margin-top: 10px; max-height: 250px; overflow-y:auto; font-size: 14px; }
+  .point-item { border-bottom: 1px solid #ddd; padding: 5px; }
+  .point-item button { width:auto; margin-left:5px; padding:3px 6px; font-size:12px; }
+  .hidden { display:none; }
+</style>
 </head>
 <body>
 
@@ -47,7 +35,6 @@
     <div id="user-info"></div>
     <button id="add-marker-btn">Добавить свою точку</button>
     <button id="logout-btn">Выйти</button>
-
     <h4>Мои точки</h4>
     <div id="user-points"></div>
   </div>
@@ -59,165 +46,150 @@
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
 <script>
-  // Конфиг Firebase
-  const firebaseConfig = {
-    apiKey: "AIzaSyCRZOp8TGfz2f4pvh3S69zixDKkAP3wmNo",
-    authDomain: "kaz3d-c2304.firebaseapp.com",
-    projectId: "kaz3d-c2304",
-    storageBucket: "kaz3d-c2304.firebasestorage.app",
-    messagingSenderId: "436945565320",
-    appId: "1:436945565320:web:54e1502338753f472fd13d"
-  };
+const firebaseConfig = {
+  apiKey: "AIzaSyCRZOp8TGfz2f4pvh3S69zixDKkAP3wmNo",
+  authDomain: "kaz3d-c2304.firebaseapp.com",
+  projectId: "kaz3d-c2304",
+  storageBucket: "kaz3d-c2304.firebasestorage.app",
+  messagingSenderId: "436945565320",
+  appId: "1:436945565320:web:54e1502338753f472fd13d"
+};
 
-  firebase.initializeApp(firebaseConfig);
-  const auth = firebase.auth();
-  const db = firebase.firestore();
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db = firebase.firestore();
 
-  // Элементы
-  const loginForm = document.getElementById('login-form');
-  const userPanel = document.getElementById('user-panel');
-  const googleBtn = document.getElementById('google-btn');
-  const logoutBtn = document.getElementById('logout-btn');
-  const userInfo = document.getElementById('user-info');
-  const addMarkerBtn = document.getElementById('add-marker-btn');
-  const userPointsDiv = document.getElementById('user-points');
+const loginForm = document.getElementById('login-form');
+const userPanel = document.getElementById('user-panel');
+const googleBtn = document.getElementById('google-btn');
+const logoutBtn = document.getElementById('logout-btn');
+const userInfo = document.getElementById('user-info');
+const addMarkerBtn = document.getElementById('add-marker-btn');
+const userPointsDiv = document.getElementById('user-points');
 
-  // Карта
-  const map = L.map('map').setView([48.5, 68], 6);
-  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    attribution: '© OpenStreetMap contributors'
-  }).addTo(map);
+const map = L.map('map').setView([48.5, 68], 6);
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+  attribution: '© OpenStreetMap contributors'
+}).addTo(map);
 
-  let markers = L.layerGroup().addTo(map);
+let markers = L.layerGroup().addTo(map);
 
-  // Загрузка всех маркеров
-  function loadAllMarkers() {
-    markers.clearLayers();
-    db.collection("3dpoints").get().then(snapshot => {
-      snapshot.forEach(doc => {
-        const d = doc.data();
-        L.marker([d.lat, d.lng]).addTo(markers)
-          .bindPopup(`<b>${d.name}</b><br>${d.address}<br>${d.phone || ''}`);
-      });
-    }).catch(err => console.error("Ошибка загрузки маркеров:", err));
-  }
-
-  // Загрузка маркеров текущего пользователя
-  function loadUserPoints(uid) {
-    userPointsDiv.innerHTML = '';
-    db.collection("3dpoints").where("uid", "==", uid).get().then(snapshot => {
-      snapshot.forEach(doc => {
-        const d = doc.data();
-        const div = document.createElement('div');
-        div.className = 'point-item';
-        div.innerHTML = `<b>${d.name}</b> (${d.address})<br>Тел: ${d.phone || 'нет'} 
-          <button onclick="editPoint('${doc.id}')">Ред.</button>
-          <button onclick="deletePoint('${doc.id}')">Удалить</button>`;
-        userPointsDiv.appendChild(div);
-      });
-    }).catch(err => console.error("Ошибка загрузки своих точек:", err));
-  }
-
-  // Редактирование точки
-  window.editPoint = (id) => {
-    const docRef = db.collection("3dpoints").doc(id);
-    docRef.get().then(doc => {
-      const data = doc.data();
-      const name = prompt("Название студии / имя", data.name);
-      const address = prompt("Адрес", data.address);
-      const phone = prompt("Телефон", data.phone || '');
-      if (name && address) {
-        docRef.update({name, address, phone}).then(() => {
-          alert("Точка обновлена!");
-          loadAllMarkers();
-          if(auth.currentUser) loadUserPoints(auth.currentUser.uid);
-        }).catch(err => console.error("Ошибка обновления точки:", err));
-      }
+function loadAllMarkers() {
+  markers.clearLayers();
+  db.collection("3dpoints").get().then(snapshot => {
+    snapshot.forEach(doc => {
+      const d = doc.data();
+      L.marker([d.lat, d.lng]).addTo(markers)
+        .bindPopup(`<b>${d.name}</b><br>${d.address}<br>${d.phone || ''}`);
     });
-  }
+  });
+}
 
-  // Удаление точки
-  window.deletePoint = (id) => {
-    if(confirm("Удалить эту точку?")) {
-      db.collection("3dpoints").doc(id).delete().then(() => {
-        alert("Точка удалена!");
+function loadUserPoints(uid) {
+  userPointsDiv.innerHTML = '';
+  db.collection("3dpoints").where("uid", "==", uid).get().then(snapshot => {
+    snapshot.forEach(doc => {
+      const d = doc.data();
+      const div = document.createElement('div');
+      div.className = 'point-item';
+      div.innerHTML = `<b>${d.name}</b> (${d.address})<br>Тел: ${d.phone || 'нет'} 
+        <button onclick="editPoint('${doc.id}')">Ред.</button>
+        <button onclick="deletePoint('${doc.id}')">Удалить</button>`;
+      userPointsDiv.appendChild(div);
+    });
+  });
+}
+
+window.editPoint = (id) => {
+  const docRef = db.collection("3dpoints").doc(id);
+  docRef.get().then(doc => {
+    const data = doc.data();
+    const name = prompt("Название студии / имя", data.name);
+    const address = prompt("Адрес", data.address);
+    const phone = prompt("Телефон", data.phone || '');
+    if (name && address) {
+      docRef.update({name, address, phone}).then(() => {
+        alert("Точка обновлена!");
         loadAllMarkers();
         if(auth.currentUser) loadUserPoints(auth.currentUser.uid);
-      }).catch(err => console.error("Ошибка удаления точки:", err));
+      });
     }
-  }
-
-  // Вход через Google
-  googleBtn.onclick = () => {
-    const provider = new firebase.auth.GoogleAuthProvider();
-    auth.signInWithPopup(provider).then(result => {
-      const user = result.user;
-      db.collection("users").doc(user.uid).set({
-        uid: user.uid,
-        name: user.displayName,
-        email: user.email,
-        photo: user.photoURL,
-        created: firebase.firestore.FieldValue.serverTimestamp()
-      }, { merge: true }).catch(err => console.error("Ошибка сохранения пользователя:", err));
-    }).catch(err => alert(err.message));
-  };
-
-  // Выход
-  logoutBtn.onclick = () => auth.signOut();
-
-  // Состояние авторизации
-  auth.onAuthStateChanged(user => {
-    if (user) {
-      loginForm.classList.add('hidden');
-      userPanel.classList.remove('hidden');
-      userInfo.innerHTML = `
-        <img src="${user.photoURL}" width="60">
-        <div><b>${user.displayName}</b></div>
-        <div style="font-size:12px;color:#666">${user.email}</div>
-      `;
-      loadUserPoints(user.uid);
-    } else {
-      loginForm.classList.remove('hidden');
-      userPanel.classList.add('hidden');
-      userPointsDiv.innerHTML = '';
-    }
-
-    // ВСЕГДА загружаем все точки на карту
-    loadAllMarkers();
   });
+}
 
-  // Добавление точки
-  addMarkerBtn.onclick = () => {
-    if(!auth.currentUser){
-      alert("Сначала войдите в аккаунт!");
-      return;
-    }
-    alert("Кликни на карте, где находится твой 3D-принтер");
-
-    map.once('click', e => {
-      const lat = e.latlng.lat;
-      const lng = e.latlng.lng;
-      const name = prompt("Название студии / имя");
-      const address = prompt("Адрес");
-      const phone = prompt("Телефон (не обязательно)", "");
-
-      if (name && address) {
-        db.collection("3dpoints").add({
-          name, address, phone,
-          lat, lng,
-          uid: auth.currentUser.uid,
-          created: firebase.firestore.FieldValue.serverTimestamp()
-        })
-        .then(() => {
-          alert("Точка добавлена!");
-          loadAllMarkers();
-          loadUserPoints(auth.currentUser.uid);
-        })
-        .catch(err => console.error("Ошибка добавления точки:", err));
-      }
+window.deletePoint = (id) => {
+  if(confirm("Удалить эту точку?")) {
+    db.collection("3dpoints").doc(id).delete().then(() => {
+      alert("Точка удалена!");
+      loadAllMarkers();
+      if(auth.currentUser) loadUserPoints(auth.currentUser.uid);
     });
-  };
+  }
+}
+
+googleBtn.onclick = () => {
+  const provider = new firebase.auth.GoogleAuthProvider();
+  auth.signInWithPopup(provider).then(result => {
+    const user = result.user;
+    db.collection("users").doc(user.uid).set({
+      uid: user.uid,
+      name: user.displayName,
+      email: user.email,
+      photo: user.photoURL,
+      created: firebase.firestore.FieldValue.serverTimestamp()
+    }, { merge: true });
+  }).catch(err => alert(err.message));
+};
+
+logoutBtn.onclick = () => auth.signOut();
+
+auth.onAuthStateChanged(user => {
+  if (user) {
+    loginForm.classList.add('hidden');
+    userPanel.classList.remove('hidden');
+    userInfo.innerHTML = `
+      <img src="${user.photoURL}" width="60">
+      <div><b>${user.displayName}</b></div>
+      <div style="font-size:12px;color:#666">${user.email}</div>
+    `;
+    loadUserPoints(user.uid);
+  } else {
+    loginForm.classList.remove('hidden');
+    userPanel.classList.add('hidden');
+    userPointsDiv.innerHTML = '';
+  }
+  loadAllMarkers(); // ВСЕГДА показываем все точки
+});
+
+addMarkerBtn.onclick = () => {
+  if(!auth.currentUser){
+    alert("Сначала войдите в аккаунт!");
+    return;
+  }
+  alert("Кликни на карте, где находится твой 3D-принтер");
+  map.once('click', e => {
+    const lat = e.latlng.lat;
+    const lng = e.latlng.lng;
+    const name = prompt("Название студии / имя");
+    const address = prompt("Адрес");
+    const phone = prompt("Телефон (не обязательно)", "");
+
+    if (name && address) {
+      db.collection("3dpoints").add({
+        name, address, phone,
+        lat, lng,
+        uid: auth.currentUser.uid,
+        created: firebase.firestore.FieldValue.serverTimestamp()
+      }).then(() => {
+        alert("Точка добавлена!");
+        loadAllMarkers();
+        loadUserPoints(auth.currentUser.uid);
+      });
+    }
+  });
+};
 </script>
 
 </body>
 </html>
+
