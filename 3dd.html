@@ -74,6 +74,10 @@ L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
 
 let markers = L.layerGroup().addTo(map);
 
+// Флаг режима добавления новой точки
+let addingPoint = false;
+
+// Загрузка всех точек
 function loadAllMarkers() {
   markers.clearLayers();
   db.collection("3dpoints").get().then(snapshot => {
@@ -85,6 +89,7 @@ function loadAllMarkers() {
   });
 }
 
+// Загрузка точек текущего пользователя
 function loadUserPoints(uid) {
   userPointsDiv.innerHTML = '';
   db.collection("3dpoints").where("uid", "==", uid).get().then(snapshot => {
@@ -100,6 +105,7 @@ function loadUserPoints(uid) {
   });
 }
 
+// Редактирование точки
 window.editPoint = (id) => {
   const docRef = db.collection("3dpoints").doc(id);
   docRef.get().then(doc => {
@@ -117,6 +123,7 @@ window.editPoint = (id) => {
   });
 }
 
+// Удаление точки
 window.deletePoint = (id) => {
   if(confirm("Удалить эту точку?")) {
     db.collection("3dpoints").doc(id).delete().then(() => {
@@ -127,6 +134,7 @@ window.deletePoint = (id) => {
   }
 }
 
+// Вход через Google
 googleBtn.onclick = () => {
   const provider = new firebase.auth.GoogleAuthProvider();
   auth.signInWithPopup(provider).then(result => {
@@ -141,8 +149,10 @@ googleBtn.onclick = () => {
   }).catch(err => alert(err.message));
 };
 
+// Выход
 logoutBtn.onclick = () => auth.signOut();
 
+// Авторизация
 auth.onAuthStateChanged(user => {
   if (user) {
     loginForm.classList.add('hidden');
@@ -161,35 +171,42 @@ auth.onAuthStateChanged(user => {
   loadAllMarkers(); // ВСЕГДА показываем все точки
 });
 
+// Кнопка "Добавить свою точку"
 addMarkerBtn.onclick = () => {
   if(!auth.currentUser){
     alert("Сначала войдите в аккаунт!");
     return;
   }
+  addingPoint = true;
   alert("Кликни на карте, где находится твой 3D-принтер");
-  map.once('click', e => {
-    const lat = e.latlng.lat;
-    const lng = e.latlng.lng;
-    const name = prompt("Название студии / имя");
-    const address = prompt("Адрес");
-    const phone = prompt("Телефон (не обязательно)", "");
-
-    if (name && address) {
-      db.collection("3dpoints").add({
-        name, address, phone,
-        lat, lng,
-        uid: auth.currentUser.uid,
-        created: firebase.firestore.FieldValue.serverTimestamp()
-      }).then(() => {
-        alert("Точка добавлена!");
-        loadAllMarkers();
-        loadUserPoints(auth.currentUser.uid);
-      });
-    }
-  });
 };
+
+// Обработчик клика по карте
+map.on('click', e => {
+  if(!addingPoint) return;
+
+  const lat = e.latlng.lat;
+  const lng = e.latlng.lng;
+  const name = prompt(" имя");
+  const address = prompt("Адрес");
+  const phone = prompt("Телефон ", "");
+
+  if (name && address) {
+    db.collection("3dpoints").add({
+      name, address, phone,
+      lat, lng,
+      uid: auth.currentUser.uid,
+      created: firebase.firestore.FieldValue.serverTimestamp()
+    }).then(() => {
+      alert("Точка добавлена!");
+      loadAllMarkers();
+      loadUserPoints(auth.currentUser.uid);
+    });
+  }
+
+  addingPoint = false; // Выключаем режим добавления
+});
 </script>
 
 </body>
 </html>
-
