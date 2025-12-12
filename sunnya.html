@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="kk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sunny A - дәмді кофе және жайлы атмосфера</title>
+    <link rel="icon" type="image/x-icon" href="icon.ico">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap');
+
+        body {
+            margin: 0;
+            font-family: 'Roboto', sans-serif;
+            background: #f8f1e9;
+            color: #3c2f2f;
+            line-height: 1.6;
+        }
+        header {
+            background: url('https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?ixlib=rb-4.0.3&auto=format&fit=crop&q=80') center/cover no-repeat;
+            height: 100vh;
+            color: white;
+            text-align: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+        header::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.55);
+        }
+        .header-content {
+            position: relative;
+            z-index: 2;
+        }
+        h1 { 
+            font-size: 5rem; 
+            margin: 0; 
+            text-shadow: 3px 3px 15px rgba(0,0,0,0.9);
+            letter-spacing: 3px;
+        }
+        h2 { color: #d4a574; text-align: center; padding: 50px 0; font-size: 2.5rem; }
+        .container { max-width: 1100px; margin: 0 auto; padding: 20px; }
+
+        /* Меню */
+        .menu { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 25px; margin: 40px 0; }
+        .card {
+            background: white;
+            padding: 25px;
+            border-radius: 18px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+            text-align: left;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        .card:hover { 
+            transform: translateY(-10px);
+            box-shadow: 0 12px 30px rgba(0,0,0,0.15);
+        }
+        .card h3 {
+            font-size: 1.8rem;
+            margin-bottom: 15px;
+            color: #d4a574;
+            text-align: center;
+        }
+        .card ul { list-style: none; padding: 0; margin: 0; }
+        .card ul li {
+            padding: 8px 0;
+            border-bottom: 1px solid #eee;
+            font-size: 1.2rem;
+        }
+        .price { float: right; font-weight: bold; color: #b8860b; }
+
+        /* Instagram */
+        .instagram-container {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        /* Worktime Cards */
+        .worktime-container {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin-top: 30px;
+        }
+        .worktime-card {
+            width: 240px;
+            background: white;
+            padding: 25px;
+            border-radius: 18px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+            text-align: center;
+            transition: 0.3s;
+        }
+        .worktime-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 12px 35px rgba(0,0,0,0.15);
+        }
+        .worktime-title {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: #d4a574;
+            margin-bottom: 10px;
+        }
+        .worktime-time {
+            font-size: 1.5rem;
+            color: #3c2f2f;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+        .worktime-break {
+            font-size: 1.2rem;
+            color: #e74c3c;
+            font-weight: bold;
+        }
+
+        footer { background: #2b1f1f; color: #ccc; text-align: center; padding: 50px 20px; }
+        .btn {
+            background: #d4a574;
+            color: white;
+            padding: 18px 40px;
+            border: none;
+            border-radius: 50px;
+            font-size: 1.3rem;
+            cursor: pointer;
+            margin-top: 30px;
+            display: inline-block;
+            text-decoration: none;
+        }
+        .btn:hover { background: #b8860b; transform: scale(1.05); }
+    </style>
+</head>
+
+<body>
+
+<header>
+    <div class="header-content">
+        <h1>Sunny A</h1>
+        <p style="font-size:2rem; margin:20px 0;">Дәмді кофе • Жайлы орын • Үлкен теледидар</p>
+        <a href="tel:+77001234567" class="btn">☎ Қоңырау шалу</a>
+    </div>
+</header>
+
+<!-- Меню -->
+<section class="container">
+    <h2>Біздің мәзір</h2>
+
+    <div class="menu">
+        <div class="card">
+            <h3>☕ Кофе</h3>
+            <ul>
+                <li>Эспрессо <span class="price">650 ₸</span></li>
+                <li>Американо <span class="price">750 ₸</span></li>
+                <li>Латте <span class="price">950 ₸</span></li>
+                <li>Капучино <span class="price">1050 ₸</span></li>
+                <li>Раф <span class="price">1150 ₸</span></li>
+                <li>Бабл кофе <span class="price">1150 ₸</span></li>
+                <li>Флэт уайт <span class="price">950 ₸</span></li>
+                <li>Ice Латте <span class="price">1000 ₸</span></li>
+            </ul>
+        </div>
+
+        <div class="card">
+            <h3>🍵 Шайлар — 1100 ₸</h3>
+            <ul>
+                <li>Ташкент шайы</li>
+                <li>Жемыс шайы</li>
+                <li>Жидек шайы</li>
+                <li>Зімбір шайы</li>
+                <li>Бұлыңғыр шайы</li>
+                <li>Марокко шай</li>
+                <li>Таңқурай шайы</li>
+                <li>Тай шайы</li>
+                <li>Улун шайы</li>
+                <li>Анчан шайы</li>
+            </ul>
+        </div>
+
+        <div class="card">
+            <h3>🥤 Bubble Tea — 1500 ₸</h3>
+            <ul>
+                <li>Сникерс</li>
+                <li>Орео</li>
+                <li>Құлпынай банан</li>
+                <li>Таро батат</li>
+                <li>Банан-тұзды карамель</li>
+                <li>Шоколад</li>
+                <li>Сакура</li>
+            </ul>
+        </div>
+
+        <div class="card">
+            <h3>🍹 Лимонад — 1300 ₸</h3>
+            <ul>
+                <li>Апельсин</li>
+                <li>Манго</li>
+                <li>Клубника</li>
+            </ul>
+        </div>
+    </div>
+</section>
+
+<!-- Instagram -->
+<section class="container">
+    <h2>Біздің Instagram</h2>
+    <div style="text-align:center;">
+        <a href="https://www.instagram.com/sunnya_coffee" class="btn" target="_blank">
+            Instagram парақшамызға өту
+        </a>
+    </div>
+</section>
+
+<!-- Жұмыс уақыты (карточки) -->
+<section class="container">
+    <h2>Жұмыс уақыты</h2>
+
+    <div class="worktime-container">
+        <div class="worktime-card">
+            <div class="worktime-title">Дс — Жм</div>
+            <div class="worktime-time">10:00 — 23:00</div>
+            <div class="worktime-break">Үзіліс: 13:00 — 15:00</div>
+        </div>
+
+        <div class="worktime-card">
+            <div class="worktime-title">Сб — Жб</div>
+            <div class="worktime-time">17:00 — 23:00</div>
+        </div>
+    </div>
+</section>
+
+<!-- Контакты -->
+<section class="container">
+    <h2>Бізді табыңыз</h2>
+    <p style="text-align:center;font-size:1.4rem;">
+        <strong>Sunny A</strong><br>
+        БҚО, Сырым ауданы, Жымпиты ауылы, А.Жумагалиев көшесі,21A<br>
+        <strong>Телефон:</strong> +7 (777) 861-07-92
+    </p>
+
+    <div style="text-align:center;">
+        <a href="https://maps.app.goo.gl/2x2xJAeHJJTehtbY8" target="_blank" class="btn">
+            Google Maps-та ашу →
+        </a>
+    </div>
+</section>
+
+<footer>
+    <p>&copy; 2025 Sunny A</p>
+</footer>
+
+</body>
+</html>
