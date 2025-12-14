@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>3D-печать в Казахстане</title>
+
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+
+<style>
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+}
+
+#app {
+  display: flex;
+  height: 100vh;
+  width: 100%;
+}
+
+#sidebar {
+  width: 340px;
+  background: #ffffff;
+  border-right: 1px solid #ddd;
+  padding: 15px;
+  box-sizing: border-box;
+  overflow-y: auto;
+}
+
+#map {
+  flex: 1;
+}
+
+button {
+  width: 100%;
+  padding: 10px;
+  margin: 6px 0;
+  border-radius: 6px;
+  border: none;
+  background: #0066ff;
+  color: white;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+button:hover {
+  background: #0050cc;
+}
+
+#logout-btn {
+  background: #d33;
+}
+
+#add-marker-btn {
+  background: #00c853;
+}
+
+#user-info {
+  text-align: center;
+  margin-bottom: 10px;
+}
+
+#user-info img {
+  border-radius: 50%;
+  margin-bottom: 5px;
+}
+
+#user-points {
+  margin-top: 10px;
+  font-size: 14px;
+}
+
+.point-item {
+  border-bottom: 1px solid #eee;
+  padding: 6px 0;
+}
+
+.point-item button {
+  width: auto;
+  padding: 3px 6px;
+  font-size: 12px;
+  margin-right: 5px;
+}
+
+.hidden {
+  display: none;
+}
+</style>
+</head>
+
+<body>
+
+<div id="app">
+  <div id="sidebar">
+
+    <div id="login-form">
+      <h3>Вход</h3>
+      <button id="google-btn">Войти через Google</button>
+    </div>
+
+    <div id="user-panel" class="hidden">
+      <div id="user-info"></div>
+
+      <button id="add-marker-btn">Добавить точку</button>
+      <button id="logout-btn">Выйти</button>
+
+      <h4>Мои точки</h4>
+      <div id="user-points"></div>
+    </div>
+
+  </div>
+
+  <div id="map"></div>
+</div>
+
+<!-- Firebase -->
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
+
+<!-- Leaflet -->
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+<script>
+// ================= FIREBASE =================
+const firebaseConfig = {
+  apiKey: "AIzaSyCRZOp8TGfz2f4pvh3S69zixDKkAP3wmNo",
+  authDomain: "kaz3d-c2304.firebaseapp.com",
+  projectId: "kaz3d-c2304",
+  storageBucket: "kaz3d-c2304.firebasestorage.app",
+  messagingSenderId: "436945565320",
+  appId: "1:436945565320:web:54e1502338753f472fd13d"
+};
+
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db = firebase.firestore();
+
+// ================= DOM =================
+const loginForm = document.getElementById('login-form');
+const userPanel = document.getElementById('user-panel');
+const googleBtn = document.getElementById('google-btn');
+const logoutBtn = document.getElementById('logout-btn');
+const userInfo = document.getElementById('user-info');
+const addMarkerBtn = document.getElementById('add-marker-btn');
+const userPointsDiv = document.getElementById('user-points');
+
+// ================= MAP (ТОЛЬКО КАЗАХСТАН) =================
+const kazakhstanBounds = L.latLngBounds(
+  [40.5, 46.5], // Юго-запад
+  [55.5, 87.3]  // Северо-восток
+);
+
+const map = L.map('map', {
+  maxBounds: kazakhstanBounds,
+  maxBoundsViscosity: 1.0
+}).setView([48.5, 68], 6);
+
+map.setMinZoom(5);
+map.setMaxZoom(18);
+
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+  attribution: '© OpenStreetMap'
+}).addTo(map);
+
+let markers = L.layerGroup().addTo(map);
+
+// ================= LOAD MARKERS =================
+function loadAllMarkers() {
+  markers.clearLayers();
+  db.collection("3dpoints").get().then(snapshot => {
+    snapshot.forEach(doc => {
+      const d = doc.data();
+      L.marker([d.lat, d.lng])
+        .addTo(markers)
+        .bindPopup(`<b>${d.name}</b><br>${d.address}<br>${d.phone || ''}`);
+    });
+  });
+}
+
+function loadUserPoints(uid) {
+  userPointsDiv.innerHTML = '';
+  db.collection("3dpoints").where("uid", "==", uid).get().then(snapshot => {
+    snapshot.forEach(doc => {
+      const d = doc.data();
+      const div = document.createElement('div');
+      div.className = 'point-item';
+      div.innerHTML = `
+        <b>${d.name}</b><br>
+        ${d.address}<br>
+        Тел: ${d.phone || 'нет'}<br>
+        <button onclick="editPoint('${doc.id}')">Ред.</button>
+        <button onclick="deletePoint('${doc.id}')">Удалить</button>
+      `;
+      userPointsDiv.appendChild(div);
+    });
+  });
+}
+
+// ================= CRUD =================
+window.editPoint = (id) => {
+  const ref = db.collection("3dpoints").doc(id);
+  ref.get().then(doc => {
+    const d = doc.data();
+    const name = prompt("Название", d.name);
+    const address = prompt("Адрес", d.address);
+    const phone = prompt("Телефон", d.phone || '');
+    if (name && address) {
+      ref.update({ name, address, phone }).then(() => {
+        loadAllMarkers();
+        loadUserPoints(auth.currentUser.uid);
+      });
+    }
+  });
+};
+
+window.deletePoint = (id) => {
+  if (confirm("Удалить точку?")) {
+    db.collection("3dpoints").doc(id).delete().then(() => {
+      loadAllMarkers();
+      loadUserPoints(auth.currentUser.uid);
+    });
+  }
+};
+
+// ================= AUTH =================
+googleBtn.onclick = () => {
+  const provider = new firebase.auth.GoogleAuthProvider();
+  auth.signInWithPopup(provider);
+};
+
+logoutBtn.onclick = () => auth.signOut();
+
+auth.onAuthStateChanged(user => {
+  if (user) {
+    loginForm.classList.add('hidden');
+    userPanel.classList.remove('hidden');
+
+    userInfo.innerHTML = `
+      <img src="${user.photoURL}" width="60"><br>
+      <b>${user.displayName}</b><br>
+      <small>${user.email}</small>
+    `;
+
+    loadUserPoints(user.uid);
+  } else {
+    loginForm.classList.remove('hidden');
+    userPanel.classList.add('hidden');
+    userPointsDiv.innerHTML = '';
+  }
+  loadAllMarkers();
+});
+
+// ================= ADD POINT =================
+addMarkerBtn.onclick = () => {
+  alert("Кликни на карте");
+  map.once('click', e => {
+    const name = prompt("Название");
+    const address = prompt("Адрес");
+    const phone = prompt("Телефон", "");
+    if (name && address) {
+      db.collection("3dpoints").add({
+        name,
+        address,
+        phone,
+        lat: e.latlng.lat,
+        lng: e.latlng.lng,
+        uid: auth.currentUser.uid,
+        created: firebase.firestore.FieldValue.serverTimestamp()
+      }).then(() => {
+        loadAllMarkers();
+        loadUserPoints(auth.currentUser.uid);
+      });
+    }
+  });
+};
+</script>
+
+</body>
+</html>
