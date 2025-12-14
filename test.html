@@ -73,9 +73,10 @@ const map = L.map('map', {
     maxBounds: bounds, 
     maxBoundsViscosity: 1, 
     minZoom: 5, 
-    maxZoom: 20, 
+    maxZoom: 12, 
     center:[48.5,68], 
-    zoom:6
+    zoom:6,
+    zoomControl: false
 });
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{
     attribution:'© OpenStreetMap contributors', 
@@ -85,50 +86,37 @@ L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{
 let markers = L.layerGroup().addTo(map);
 let selectedLatLng = null;
 
-function hideButtonsAndList(){
-    document.getElementById('google-btn').style.display='none';
+// ===== MODAL =====
+const modal = document.getElementById('modal');
+function openModal(){ 
+    modal.style.display='flex'; 
+    map.dragging.disable(); 
+    map.scrollWheelZoom.disable(); 
+    hideOverlayElements(); 
+}
+function closeModal(){ 
+    modal.style.display='none'; 
+    map.dragging.enable(); 
+    map.scrollWheelZoom.enable(); 
+    selectedLatLng=null; 
+    showOverlayElements(); 
+}
+modal.addEventListener('click', e=>{ if(e.target===modal) closeModal(); });
+
+// ===== HIDE/SHOW ELEMENTS =====
+function hideOverlayElements(){
     document.getElementById('add-marker-btn').style.display='none';
     document.getElementById('logout-btn').style.display='none';
     document.getElementById('user-points').style.display='none';
 }
-
-function showButtonsAndList(){
+function showOverlayElements(){
     if(auth.currentUser){
-        // Пользователь залогинен
         document.getElementById('add-marker-btn').style.display='block';
         document.getElementById('logout-btn').style.display='block';
-        document.getElementById('google-btn').style.display='none'; // прячем Google кнопку
         const userPoints = document.getElementById('user-points');
         if(userPoints.children.length>0) userPoints.style.display='block';
-    } else {
-        // Пользователь не залогинен
-        document.getElementById('google-btn').style.display='block';
-        document.getElementById('add-marker-btn').style.display='none';
-        document.getElementById('logout-btn').style.display='none';
-        document.getElementById('user-points').style.display='none';
     }
 }
-
-// ===== MODAL =====
-const modal = document.getElementById('modal');
-
-function openModal(){
-    modal.style.display='flex';
-    map.dragging.disable();
-    map.scrollWheelZoom.disable();
-    hideButtonsAndList(); // скрываем кнопки и список
-}
-
-// Закрытие модалки
-function closeModal(){
-    modal.style.display='none';
-    map.dragging.enable();
-    map.scrollWheelZoom.enable();
-    selectedLatLng=null;
-    showButtonsAndList(); // показываем кнопки и список заново
-}
-
-modal.addEventListener('click', e=>{ if(e.target===modal) closeModal(); });
 
 // ===== LOAD MARKERS =====
 function loadMarkers(){
@@ -188,18 +176,16 @@ auth.onAuthStateChanged(user=>{
     if(user){
         document.getElementById('add-marker-btn').style.display='block';
         document.getElementById('logout-btn').style.display='block';
-        const userPoints = document.getElementById('user-points');
+        document.getElementById('google-btn').style.display='none';
         loadUserPoints(user.uid);
-        userPoints.style.display = 'block'; // показываем список
     } else {
         document.getElementById('add-marker-btn').style.display='none';
         document.getElementById('logout-btn').style.display='none';
-        const userPoints = document.getElementById('user-points');
-        userPoints.style.display = 'none'; // скрываем список
+        document.getElementById('google-btn').style.display='block';
+        document.getElementById('user-points').style.display='none';
     }
-    loadMarkers(); // все точки видны всегда
+    loadMarkers();
 });
-
 
 // ===== ADD POINT =====
 document.getElementById('add-marker-btn').onclick = ()=>{
