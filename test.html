@@ -4,80 +4,27 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>3D-печать в Казахстане</title>
-
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
-
 <style>
 body { margin:0; font-family:Arial,sans-serif; }
 #app { display:flex; height:100vh; }
-
-#sidebar {
-  width:360px;
-  background:#fff;
-  border-right:1px solid #ddd;
-  padding:15px;
-  overflow-y:auto;
-}
-
+#sidebar { width:360px; background:#fff; border-right:1px solid #ddd; padding:15px; overflow-y:auto; }
 #map { flex:1; }
-
-button {
-  width:100%;
-  padding:10px;
-  margin:6px 0;
-  border:none;
-  border-radius:6px;
-  background:#0066ff;
-  color:#fff;
-  font-weight:bold;
-  cursor:pointer;
-}
+button { width:100%; padding:10px; margin:6px 0; border:none; border-radius:6px; background:#0066ff; color:#fff; font-weight:bold; cursor:pointer; }
 button:hover { background:#0050cc; }
 #logout-btn { background:#d33; }
 #add-marker-btn { background:#00c853; }
-
-input {
-  width:100%;
-  padding:8px;
-  margin:4px 0 10px;
-  border:1px solid #ccc;
-  border-radius:5px;
-}
-
+input { width:100%; padding:8px; margin:4px 0 10px; border:1px solid #ccc; border-radius:5px; }
 label { font-size:14px; font-weight:bold; }
-
-.checkbox {
-  display:flex;
-  gap:6px;
-  align-items:center;
-  font-size:13px;
-  margin-bottom:8px;
-}
-
+.checkbox { display:flex; gap:6px; align-items:center; font-size:13px; margin-bottom:8px; }
 .hidden { display:none !important; }
-
 /* MODAL */
-#modal {
-  position:fixed;
-  inset:0;
-  background:rgba(0,0,0,.5);
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  z-index:5000;
-}
-
-#modal-content {
-  background:#fff;
-  width:420px;
-  padding:20px;
-  border-radius:10px;
-  max-height:90vh;
-  overflow-y:auto;
-}
+#modal { position:fixed; inset:0; background:rgba(0,0,0,.5); display:flex; align-items:center; justify-content:center; z-index:5000; }
+#modal-content { background:#fff; width:420px; padding:20px; border-radius:10px; max-height:90vh; overflow-y:auto; }
+.point-item { border-bottom:1px solid #ddd; padding:5px; margin-bottom:5px; }
+.point-item button { width:auto; padding:3px 6px; margin-left:5px; font-size:12px; }
 </style>
 </head>
-
 <body>
 
 <div id="app">
@@ -92,10 +39,11 @@ label { font-size:14px; font-weight:bold; }
       <div id="user-info"></div>
       <button id="add-marker-btn">Добавить точку</button>
       <button id="logout-btn">Выйти</button>
+      <h4>Мои точки</h4>
+      <div id="user-points" style="max-height:250px; overflow-y:auto;"></div>
     </div>
 
   </div>
-
   <div id="map"></div>
 </div>
 
@@ -103,48 +51,22 @@ label { font-size:14px; font-weight:bold; }
 <div id="modal" class="hidden">
   <div id="modal-content">
     <h3>Добавить 3D-печать</h3>
-
-    <label>Имя</label>
-    <input id="f-name">
-
-    <label>Название принтера</label>
-    <input id="f-printer">
-
-    <label>Материалы</label>
-    <input id="f-materials">
-
-    <label>Цены</label>
-    <input id="f-price">
-
-    <label>Адрес</label>
-    <input id="f-address">
-
-    <label>WhatsApp</label>
-    <input id="f-wa">
-    <div class="checkbox">
-      <input type="checkbox" id="no-wa"> нет
-    </div>
-
-    <label>Telegram</label>
-    <input id="f-tg">
-    <div class="checkbox">
-      <input type="checkbox" id="no-tg"> нет
-    </div>
-
-    <label>Instagram</label>
-    <input id="f-ig">
-    <div class="checkbox">
-      <input type="checkbox" id="no-ig"> нет
-    </div>
-
+    <label>Имя</label><input id="f-name">
+    <label>Название принтера</label><input id="f-printer">
+    <label>Материалы</label><input id="f-materials">
+    <label>Цены</label><input id="f-price">
+    <label>Адрес</label><input id="f-address">
+    <label>WhatsApp</label><input id="f-wa">
+    <div class="checkbox"><input type="checkbox" id="no-wa"> нет</div>
+    <label>Telegram</label><input id="f-tg">
+    <div class="checkbox"><input type="checkbox" id="no-tg"> нет</div>
+    <label>Instagram</label><input id="f-ig">
+    <div class="checkbox"><input type="checkbox" id="no-ig"> нет</div>
     <button id="save">Сохранить</button>
-    <button type="button" onclick="closeModal()" style="background:#aaa">
-      Отмена
-    </button>
+    <button type="button" onclick="closeModal()" style="background:#aaa">Отмена</button>
   </div>
 </div>
 
-<!-- LIBS -->
 <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
@@ -157,58 +79,85 @@ firebase.initializeApp({
   authDomain: "kaz3d-c2304.firebaseapp.com",
   projectId: "kaz3d-c2304"
 });
-
 const auth = firebase.auth();
 const db = firebase.firestore();
 
-// ===== MAP (KAZAKHSTAN) =====
+// ===== MAP =====
 const bounds = L.latLngBounds([40.5,46.5],[55.5,87.3]);
 const map = L.map('map',{ maxBounds:bounds, maxBoundsViscosity:1 }).setView([48.5,68],6);
-
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
 let markers = L.layerGroup().addTo(map);
+let selectedLatLng = null;
 
 // ===== MODAL =====
 const modal = document.getElementById('modal');
-let selectedLatLng = null;
+function openModal(){ modal.classList.remove('hidden'); map.dragging.disable(); map.scrollWheelZoom.disable(); }
+function closeModal(){ modal.classList.add('hidden'); map.dragging.enable(); map.scrollWheelZoom.enable(); selectedLatLng=null; }
+modal.addEventListener('click', e=>{ if(e.target===modal) closeModal(); });
 
-function openModal(){
-  modal.classList.remove('hidden');
-  map.dragging.disable();
-  map.scrollWheelZoom.disable();
-}
-
-function closeModal(){
-  modal.classList.add('hidden');
-  map.dragging.enable();
-  map.scrollWheelZoom.enable();
-  selectedLatLng = null;
-}
-
-// закрытие по фону
-modal.addEventListener('click', e=>{
-  if(e.target === modal) closeModal();
-});
-
-// ===== LOAD MARKERS =====
+// ===== LOAD ALL MARKERS =====
 function loadMarkers(){
   markers.clearLayers();
   db.collection("3dpoints").get().then(snap=>{
     snap.forEach(doc=>{
       const d = doc.data();
-      L.marker([d.lat,d.lng]).addTo(markers)
-        .bindPopup(`
+      L.marker([d.lat,d.lng]).addTo(markers).bindPopup(`
 <b>${d.name}</b><br>
 Принтер: ${d.printer}<br>
 Материалы: ${d.materials}<br>
 Цена: ${d.price}<br>
 Адрес: ${d.address}<br>
-WA: ${d.whatsapp || 'нет'}<br>
-TG: ${d.telegram || 'нет'}<br>
-IG: ${d.instagram || 'нет'}
+WA: ${d.whatsapp||'нет'}<br>
+TG: ${d.telegram||'нет'}<br>
+IG: ${d.instagram||'нет'}
 `);
     });
   });
+}
+
+// ===== LOAD USER POINTS =====
+function loadUserPoints(uid){
+  const container = document.getElementById('user-points');
+  container.innerHTML='';
+  db.collection("3dpoints").where("uid","==",uid).get().then(snap=>{
+    snap.forEach(doc=>{
+      const d = doc.data();
+      const div = document.createElement('div');
+      div.className='point-item';
+      div.innerHTML=`
+<b>${d.name}</b> (${d.address})<br>
+Принтер: ${d.printer}, Материалы: ${d.materials}<br>
+Цена: ${d.price}, WA: ${d.whatsapp||'нет'}, TG: ${d.telegram||'нет'}, IG: ${d.instagram||'нет'}<br>
+<button onclick="editPoint('${doc.id}')">Ред.</button>
+<button onclick="deletePoint('${doc.id}')">Удалить</button>
+`;
+      container.appendChild(div);
+    });
+  });
+}
+
+// ===== EDIT & DELETE POINTS =====
+window.editPoint = id=>{
+  db.collection("3dpoints").doc(id).get().then(doc=>{
+    const data = doc.data();
+    const name = prompt("Имя",data.name);
+    const printer = prompt("Принтер",data.printer);
+    const materials = prompt("Материалы",data.materials);
+    const price = prompt("Цена",data.price);
+    const address = prompt("Адрес",data.address);
+    const whatsapp = prompt("WhatsApp",data.whatsapp||'');
+    const telegram = prompt("Telegram",data.telegram||'');
+    const instagram = prompt("Instagram",data.instagram||'');
+    if(name && address){
+      doc.ref.update({name, printer, materials, price, address, whatsapp, telegram, instagram})
+      .then(()=>{ loadMarkers(); if(auth.currentUser) loadUserPoints(auth.currentUser.uid); });
+    }
+  });
+}
+window.deletePoint = id=>{
+  if(confirm("Удалить эту точку?")){
+    db.collection("3dpoints").doc(id).delete().then(()=>{ loadMarkers(); if(auth.currentUser) loadUserPoints(auth.currentUser.uid); });
+  }
 }
 
 // ===== AUTH =====
@@ -216,67 +165,45 @@ auth.onAuthStateChanged(user=>{
   if(user){
     document.getElementById('login-form').classList.add('hidden');
     document.getElementById('user-panel').classList.remove('hidden');
-    document.getElementById('user-info').innerHTML =
-      `<b>${user.displayName}</b><br><small>${user.email}</small>`;
+    document.getElementById('user-info').innerHTML=`<b>${user.displayName}</b><br><small>${user.email}</small>`;
+    loadUserPoints(user.uid);
   } else {
     document.getElementById('login-form').classList.remove('hidden');
     document.getElementById('user-panel').classList.add('hidden');
   }
+  loadMarkers();
 });
 
 // ===== ADD POINT =====
-document.getElementById('add-marker-btn').onclick = () => {
-  if(!auth.currentUser){
-    alert("Сначала войдите в аккаунт");
-    return;
-  }
-
+document.getElementById('add-marker-btn').onclick = ()=>{
+  if(!auth.currentUser){ alert("Сначала войдите в аккаунт"); return; }
   alert("Кликни на карте, чтобы выбрать место");
-
-  map.once('click', e=>{
-    selectedLatLng = e.latlng;
-    openModal();
-  });
-};
+  map.once('click', e=>{ selectedLatLng=e.latlng; openModal(); });
+}
 
 // ===== SAVE POINT =====
 document.getElementById('save').onclick = ()=>{
   if(!selectedLatLng) return;
-
-  const data = {
+  const data={
     name: document.getElementById('f-name').value,
     printer: document.getElementById('f-printer').value,
     materials: document.getElementById('f-materials').value,
     price: document.getElementById('f-price').value,
     address: document.getElementById('f-address').value,
-    whatsapp: document.getElementById('no-wa').checked ? null : document.getElementById('f-wa').value,
-    telegram: document.getElementById('no-tg').checked ? null : document.getElementById('f-tg').value,
-    instagram: document.getElementById('no-ig').checked ? null : document.getElementById('f-ig').value,
+    whatsapp: document.getElementById('no-wa').checked?null:document.getElementById('f-wa').value,
+    telegram: document.getElementById('no-tg').checked?null:document.getElementById('f-tg').value,
+    instagram: document.getElementById('no-ig').checked?null:document.getElementById('f-ig').value,
     lat: selectedLatLng.lat,
     lng: selectedLatLng.lng,
     uid: auth.currentUser.uid
   };
+  db.collection("3dpoints").add(data).then(()=>{ closeModal(); loadMarkers(); loadUserPoints(auth.currentUser.uid); })
+  .catch(err=>alert("Ошибка: "+err.message));
+}
 
-  db.collection("3dpoints").add(data).then(()=>{
-    closeModal();
-    loadMarkers();
-  }).catch(err=>{
-    alert("Ошибка при сохранении: "+err.message);
-  });
-};
-
-// ===== GOOGLE LOGIN =====
-document.getElementById('google-btn').onclick = ()=>{
-  auth.signInWithPopup(new firebase.auth.GoogleAuthProvider());
-};
-
-// ===== LOGOUT =====
-document.getElementById('logout-btn').onclick = ()=>{
-  auth.signOut();
-};
-
-// ===== LOAD MARKERS ON START =====
-loadMarkers(); // точки видны ВСЕГДА
+// ===== LOGIN / LOGOUT =====
+document.getElementById('google-btn').onclick = ()=>{ auth.signInWithPopup(new firebase.auth.GoogleAuthProvider()); }
+document.getElementById('logout-btn').onclick = ()=>{ auth.signOut(); }
 </script>
 
 </body>
