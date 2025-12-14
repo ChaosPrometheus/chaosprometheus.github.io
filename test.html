@@ -12,6 +12,7 @@ button { padding:8px 12px; margin:5px; border:none; border-radius:5px; cursor:po
 #google-btn { position: fixed; top:10px; left:10px; z-index:5000; background:#4285F4; color:#fff; }
 #add-marker-btn { position: fixed; top:50px; left:10px; z-index:5000; background:#00c853; color:#fff; display:none; }
 #logout-btn { position: fixed; top:90px; left:10px; z-index:5000; background:#d33; color:#fff; display:none; }
+#user-avatar { position:fixed; top:10px; left:10px; width:40px; height:40px; border-radius:50%; display:none; z-index:5000; cursor:pointer; }
 #user-points { position:fixed; top:130px; left:10px; max-height:50vh; overflow-y:auto; z-index:5000; background:#fff; padding:10px; border-radius:6px; display:none; width:300px; }
 #modal { position:fixed; inset:0; background:rgba(0,0,0,.5); display:none; align-items:center; justify-content:center; z-index:4000; }
 #modal-content { background:#fff; width:350px; padding:20px; border-radius:10px; max-height:90vh; overflow-y:auto; }
@@ -29,6 +30,7 @@ label { font-size:14px; font-weight:bold; }
 <button id="google-btn">Войти через Google</button>
 <button id="add-marker-btn">Добавить точку</button>
 <button id="logout-btn">Выйти</button>
+<img id="user-avatar" src="" title="Вы вошли">
 
 <div id="user-points"></div>
 
@@ -172,20 +174,34 @@ window.deletePoint = id=>{
 }
 
 // ===== AUTH =====
+const avatar = document.getElementById('user-avatar');
 auth.onAuthStateChanged(user=>{
     if(user){
         document.getElementById('add-marker-btn').style.display='block';
         document.getElementById('logout-btn').style.display='block';
         document.getElementById('google-btn').style.display='none';
+        avatar.src = user.photoURL || '';
+        avatar.style.display = 'block';
         loadUserPoints(user.uid);
     } else {
         document.getElementById('add-marker-btn').style.display='none';
         document.getElementById('logout-btn').style.display='none';
         document.getElementById('google-btn').style.display='block';
+        avatar.style.display = 'none';
         document.getElementById('user-points').style.display='none';
     }
     loadMarkers();
 });
+
+// ===== AVATAR CLICK =====
+avatar.onclick = ()=>{
+    const points = document.getElementById('user-points');
+    if(points.style.display==='block'){
+        points.style.display='none';
+    } else if(auth.currentUser && points.children.length>0){
+        points.style.display='block';
+    }
+}
 
 // ===== ADD POINT =====
 document.getElementById('add-marker-btn').onclick = ()=>{
@@ -222,6 +238,5 @@ document.getElementById('google-btn').onclick = ()=>{ auth.signInWithPopup(new f
 document.getElementById('logout-btn').onclick = ()=>{ auth.signOut(); }
 
 </script>
-
 </body>
 </html>
