@@ -84,10 +84,18 @@ const db = firebase.firestore();
 
 // ===== MAP =====
 const bounds = L.latLngBounds([40.5,46.5],[55.5,87.3]);
-const map = L.map('map',{ maxBounds:bounds, maxBoundsViscosity:1 }).setView([48.5,68],6);
-L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
-let markers = L.layerGroup().addTo(map);
-let selectedLatLng = null;
+const map = L.map('map', { 
+    maxBounds: bounds,           // границы Казахстана
+    maxBoundsViscosity: 1,       // центр карты не уйдёт за границы
+    minZoom: 5,                  // минимальный zoom (чтобы карта не отходила)
+    maxZoom: 10                  // максимальный zoom (по желанию)
+}).setView([48.5,68],6);
+
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '© OpenStreetMap contributors',
+    noWrap: true                  // запрет дублирования карты
+}).addTo(map);
+
 
 // ===== MODAL =====
 const modal = document.getElementById('modal');
