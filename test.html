@@ -163,15 +163,10 @@ const db = firebase.firestore();
 
 // ===== MAP (KAZAKHSTAN) =====
 const bounds = L.latLngBounds([40.5,46.5],[55.5,87.3]);
-const map = L.map('map',{
-  maxBounds:bounds,
-  maxBoundsViscosity:1
-}).setView([48.5,68],6);
+const map = L.map('map',{ maxBounds:bounds, maxBoundsViscosity:1 }).setView([48.5,68],6);
 
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
 let markers = L.layerGroup().addTo(map);
-loadMarkers(); // ПОКАЗЫВАЕМ ТОЧКИ ВСЕГДА
-
 
 // ===== MODAL =====
 const modal = document.getElementById('modal');
@@ -195,42 +190,6 @@ modal.addEventListener('click', e=>{
   if(e.target === modal) closeModal();
 });
 
-// ===== ADD POINT =====
-document.getElementById('add-marker-btn').onclick = () => {
-  if(!auth.currentUser){
-    alert("Сначала войдите в аккаунт");
-    return;
-  }
-
-  alert("Кликни на карте, чтобы выбрать место");
-
-  map.once('click', e=>{
-    selectedLatLng = e.latlng;
-    openModal();
-  });
-};
-
-document.getElementById('save').onclick = ()=>{
-  if(!selectedLatLng) return;
-
-  db.collection("3dpoints").add({
-    name: f-name.value,
-    printer: f-printer.value,
-    materials: f-materials.value,
-    price: f-price.value,
-    address: f-address.value,
-    whatsapp: no-wa.checked ? null : f-wa.value,
-    telegram: no-tg.checked ? null : f-tg.value,
-    instagram: no-ig.checked ? null : f-ig.value,
-    lat: selectedLatLng.lat,
-    lng: selectedLatLng.lng,
-    uid: auth.currentUser.uid
-  }).then(()=>{
-    closeModal();
-    loadMarkers();
-  });
-};
-
 // ===== LOAD MARKERS =====
 function loadMarkers(){
   markers.clearLayers();
@@ -238,7 +197,16 @@ function loadMarkers(){
     snap.forEach(doc=>{
       const d = doc.data();
       L.marker([d.lat,d.lng]).addTo(markers)
-        .bindPopup(`<b>${d.name}</b><br>${d.address}`);
+        .bindPopup(`
+<b>${d.name}</b><br>
+Принтер: ${d.printer}<br>
+Материалы: ${d.materials}<br>
+Цена: ${d.price}<br>
+Адрес: ${d.address}<br>
+WA: ${d.whatsapp || 'нет'}<br>
+TG: ${d.telegram || 'нет'}<br>
+IG: ${d.instagram || 'нет'}
+`);
     });
   });
 }
@@ -256,13 +224,59 @@ auth.onAuthStateChanged(user=>{
   }
 });
 
+// ===== ADD POINT =====
+document.getElementById('add-marker-btn').onclick = () => {
+  if(!auth.currentUser){
+    alert("Сначала войдите в аккаунт");
+    return;
+  }
+
+  alert("Кликни на карте, чтобы выбрать место");
+
+  map.once('click', e=>{
+    selectedLatLng = e.latlng;
+    openModal();
+  });
+};
+
+// ===== SAVE POINT =====
+document.getElementById('save').onclick = ()=>{
+  if(!selectedLatLng) return;
+
+  const data = {
+    name: document.getElementById('f-name').value,
+    printer: document.getElementById('f-printer').value,
+    materials: document.getElementById('f-materials').value,
+    price: document.getElementById('f-price').value,
+    address: document.getElementById('f-address').value,
+    whatsapp: document.getElementById('no-wa').checked ? null : document.getElementById('f-wa').value,
+    telegram: document.getElementById('no-tg').checked ? null : document.getElementById('f-tg').value,
+    instagram: document.getElementById('no-ig').checked ? null : document.getElementById('f-ig').value,
+    lat: selectedLatLng.lat,
+    lng: selectedLatLng.lng,
+    uid: auth.currentUser.uid
+  };
+
+  db.collection("3dpoints").add(data).then(()=>{
+    closeModal();
+    loadMarkers();
+  }).catch(err=>{
+    alert("Ошибка при сохранении: "+err.message);
+  });
+};
+
+// ===== GOOGLE LOGIN =====
 document.getElementById('google-btn').onclick = ()=>{
   auth.signInWithPopup(new firebase.auth.GoogleAuthProvider());
 };
 
+// ===== LOGOUT =====
 document.getElementById('logout-btn').onclick = ()=>{
   auth.signOut();
 };
+
+// ===== LOAD MARKERS ON START =====
+loadMarkers(); // точки видны ВСЕГДА
 </script>
 
 </body>
