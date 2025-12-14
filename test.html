@@ -5,11 +5,10 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>3D-печать в Казахстане</title>
 
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 
 <style>
-body { margin:0; font-family: Arial, sans-serif; }
-
+body { margin:0; font-family:Arial,sans-serif; }
 #app { display:flex; height:100vh; }
 
 #sidebar {
@@ -33,12 +32,11 @@ button {
   font-weight:bold;
   cursor:pointer;
 }
-
 button:hover { background:#0050cc; }
 #logout-btn { background:#d33; }
 #add-marker-btn { background:#00c853; }
 
-input, textarea {
+input {
   width:100%;
   padding:8px;
   margin:4px 0 10px;
@@ -50,37 +48,32 @@ label { font-size:14px; font-weight:bold; }
 
 .checkbox {
   display:flex;
+  gap:6px;
   align-items:center;
-  gap:5px;
   font-size:13px;
+  margin-bottom:8px;
 }
 
-.hidden { display:none; }
+.hidden { display:none !important; }
 
 /* MODAL */
 #modal {
   position:fixed;
   inset:0;
-  background:rgba(0,0,0,.4);
+  background:rgba(0,0,0,.5);
   display:flex;
   align-items:center;
   justify-content:center;
-  z-index:2000;
+  z-index:5000;
 }
 
 #modal-content {
   background:#fff;
+  width:420px;
   padding:20px;
-  width:400px;
   border-radius:10px;
   max-height:90vh;
   overflow-y:auto;
-}
-
-.point-item {
-  border-bottom:1px solid #eee;
-  padding:6px 0;
-  font-size:14px;
 }
 </style>
 </head>
@@ -89,6 +82,7 @@ label { font-size:14px; font-weight:bold; }
 
 <div id="app">
   <div id="sidebar">
+
     <div id="login-form">
       <h3>Вход</h3>
       <button id="google-btn">Войти через Google</button>
@@ -98,16 +92,14 @@ label { font-size:14px; font-weight:bold; }
       <div id="user-info"></div>
       <button id="add-marker-btn">Добавить точку</button>
       <button id="logout-btn">Выйти</button>
-
-      <h4>Мои точки</h4>
-      <div id="user-points"></div>
     </div>
+
   </div>
 
   <div id="map"></div>
 </div>
 
-<!-- MODAL FORM -->
+<!-- MODAL -->
 <div id="modal" class="hidden">
   <div id="modal-content">
     <h3>Добавить 3D-печать</h3>
@@ -119,28 +111,36 @@ label { font-size:14px; font-weight:bold; }
     <input id="f-printer">
 
     <label>Материалы</label>
-    <input id="f-materials" placeholder="PLA, ABS, PETG">
+    <input id="f-materials">
 
     <label>Цены</label>
-    <input id="f-price" placeholder="₸ / час или ₸ / грамм">
+    <input id="f-price">
 
     <label>Адрес</label>
     <input id="f-address">
 
     <label>WhatsApp</label>
-    <input id="f-whatsapp">
-    <div class="checkbox"><input type="checkbox" id="no-wa"> нет</div>
+    <input id="f-wa">
+    <div class="checkbox">
+      <input type="checkbox" id="no-wa"> нет
+    </div>
 
     <label>Telegram</label>
-    <input id="f-telegram">
-    <div class="checkbox"><input type="checkbox" id="no-tg"> нет</div>
+    <input id="f-tg">
+    <div class="checkbox">
+      <input type="checkbox" id="no-tg"> нет
+    </div>
 
     <label>Instagram</label>
-    <input id="f-instagram">
-    <div class="checkbox"><input type="checkbox" id="no-ig"> нет</div>
+    <input id="f-ig">
+    <div class="checkbox">
+      <input type="checkbox" id="no-ig"> нет
+    </div>
 
-    <button id="save-point">Сохранить</button>
-    <button onclick="closeModal()" style="background:#aaa">Отмена</button>
+    <button id="save">Сохранить</button>
+    <button type="button" onclick="closeModal()" style="background:#aaa">
+      Отмена
+    </button>
   </div>
 </div>
 
@@ -151,91 +151,117 @@ label { font-size:14px; font-weight:bold; }
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
 <script>
-const firebaseConfig = {
+// ===== FIREBASE =====
+firebase.initializeApp({
   apiKey: "AIzaSyCRZOp8TGfz2f4pvh3S69zixDKkAP3wmNo",
   authDomain: "kaz3d-c2304.firebaseapp.com",
-  projectId: "kaz3d-c2304",
-};
-firebase.initializeApp(firebaseConfig);
+  projectId: "kaz3d-c2304"
+});
 
 const auth = firebase.auth();
 const db = firebase.firestore();
 
-// MAP (Kazakhstan)
+// ===== MAP (KAZAKHSTAN) =====
 const bounds = L.latLngBounds([40.5,46.5],[55.5,87.3]);
-const map = L.map('map',{maxBounds:bounds,maxBoundsViscosity:1})
-  .setView([48.5,68],6);
+const map = L.map('map',{
+  maxBounds:bounds,
+  maxBoundsViscosity:1
+}).setView([48.5,68],6);
 
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
 let markers = L.layerGroup().addTo(map);
 
-// UI
+// ===== MODAL =====
 const modal = document.getElementById('modal');
-let clickLatLng = null;
+let selectedLatLng = null;
 
-function closeModal(){ modal.classList.add('hidden'); }
+function openModal(){
+  modal.classList.remove('hidden');
+  map.dragging.disable();
+  map.scrollWheelZoom.disable();
+}
 
+function closeModal(){
+  modal.classList.add('hidden');
+  map.dragging.enable();
+  map.scrollWheelZoom.enable();
+  selectedLatLng = null;
+}
+
+// закрытие по фону
+modal.addEventListener('click', e=>{
+  if(e.target === modal) closeModal();
+});
+
+// ===== ADD POINT =====
 document.getElementById('add-marker-btn').onclick = () => {
-  alert("Кликни на карте");
+  if(!auth.currentUser){
+    alert("Сначала войдите в аккаунт");
+    return;
+  }
+
+  alert("Кликни на карте, чтобы выбрать место");
+
   map.once('click', e=>{
-    clickLatLng = e.latlng;
-    modal.classList.remove('hidden');
+    selectedLatLng = e.latlng;
+    openModal();
   });
 };
 
-document.getElementById('save-point').onclick = ()=>{
-  const data = {
+document.getElementById('save').onclick = ()=>{
+  if(!selectedLatLng) return;
+
+  db.collection("3dpoints").add({
     name: f-name.value,
     printer: f-printer.value,
     materials: f-materials.value,
     price: f-price.value,
     address: f-address.value,
-    whatsapp: no-wa.checked ? null : f-whatsapp.value,
-    telegram: no-tg.checked ? null : f-telegram.value,
-    instagram: no-ig.checked ? null : f-instagram.value,
-    lat: clickLatLng.lat,
-    lng: clickLatLng.lng,
+    whatsapp: no-wa.checked ? null : f-wa.value,
+    telegram: no-tg.checked ? null : f-tg.value,
+    instagram: no-ig.checked ? null : f-ig.value,
+    lat: selectedLatLng.lat,
+    lng: selectedLatLng.lng,
     uid: auth.currentUser.uid
-  };
-
-  db.collection("3dpoints").add(data).then(()=>{
+  }).then(()=>{
     closeModal();
     loadMarkers();
   });
 };
 
+// ===== LOAD MARKERS =====
 function loadMarkers(){
   markers.clearLayers();
   db.collection("3dpoints").get().then(snap=>{
     snap.forEach(doc=>{
       const d = doc.data();
       L.marker([d.lat,d.lng]).addTo(markers)
-      .bindPopup(`
-<b>${d.name}</b><br>
-Принтер: ${d.printer}<br>
-Материалы: ${d.materials}<br>
-Цена: ${d.price}<br>
-Адрес: ${d.address}<br>
-WA: ${d.whatsapp || 'нет'}<br>
-TG: ${d.telegram || 'нет'}<br>
-IG: ${d.instagram || 'нет'}
-`);
+        .bindPopup(`<b>${d.name}</b><br>${d.address}`);
     });
   });
 }
 
-auth.onAuthStateChanged(u=>{
-  if(u){
+// ===== AUTH =====
+auth.onAuthStateChanged(user=>{
+  if(user){
     document.getElementById('login-form').classList.add('hidden');
     document.getElementById('user-panel').classList.remove('hidden');
+    document.getElementById('user-info').innerHTML =
+      `<b>${user.displayName}</b><br><small>${user.email}</small>`;
     loadMarkers();
+  } else {
+    document.getElementById('login-form').classList.remove('hidden');
+    document.getElementById('user-panel').classList.add('hidden');
   }
 });
 
 document.getElementById('google-btn').onclick = ()=>{
   auth.signInWithPopup(new firebase.auth.GoogleAuthProvider());
 };
-document.getElementById('logout-btn').onclick = ()=>auth.signOut();
+
+document.getElementById('logout-btn').onclick = ()=>{
+  auth.signOut();
+};
 </script>
 
 </body>
