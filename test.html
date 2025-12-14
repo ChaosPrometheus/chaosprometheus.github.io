@@ -6,59 +6,31 @@
 <title>3D-печать в Казахстане</title>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 <style>
-body { margin:0; font-family:Arial,sans-serif; overflow-x:hidden; }
-#app { display:flex; height:100vh; }
-#sidebar {
-  width:360px;
-  transition: all 0.3s ease;
-  background:#fff;
-  border-right:1px solid #ddd;
-  padding:15px;
-  overflow:hidden;
-  position:relative;
-}
-#sidebar.collapsed { width:50px; padding:5px; }
-#sidebar .content { transition: opacity 0.3s ease; }
-#sidebar.collapsed .content { opacity:0; pointer-events:none; }
-#sidebar.collapsed #google-btn { display:block; width:100%; margin-top:10px; }
-#map { flex:1; }
-button { width:100%; padding:10px; margin:6px 0; border:none; border-radius:6px; background:#0066ff; color:#fff; font-weight:bold; cursor:pointer; }
-button:hover { background:#0050cc; }
-#logout-btn { background:#d33; }
-#add-marker-btn { background:#00c853; }
-input { width:100%; padding:8px; margin:4px 0 10px; border:1px solid #ccc; border-radius:5px; }
+body { margin:0; font-family:Arial,sans-serif; }
+#map { width:100%; height:100vh; }
+button { padding:8px 12px; margin:5px; border:none; border-radius:5px; cursor:pointer; font-weight:bold; }
+#google-btn { position: fixed; top:10px; left:10px; z-index:5000; background:#4285F4; color:#fff; }
+#add-marker-btn { position: fixed; top:50px; left:10px; z-index:5000; background:#00c853; color:#fff; display:none; }
+#logout-btn { position: fixed; top:90px; left:10px; z-index:5000; background:#d33; color:#fff; display:none; }
+#user-points { position:fixed; top:130px; left:10px; max-height:50vh; overflow-y:auto; z-index:5000; background:#fff; padding:10px; border-radius:6px; display:none; width:300px; }
+#modal { position:fixed; inset:0; background:rgba(0,0,0,.5); display:none; align-items:center; justify-content:center; z-index:4000; }
+#modal-content { background:#fff; width:350px; padding:20px; border-radius:10px; max-height:90vh; overflow-y:auto; }
+input { width:100%; padding:6px; margin-bottom:8px; border:1px solid #ccc; border-radius:4px; }
 label { font-size:14px; font-weight:bold; }
 .checkbox { display:flex; gap:6px; align-items:center; font-size:13px; margin-bottom:8px; }
-.hidden { display:none !important; }
-/* MODAL */
-#modal { position:fixed; inset:0; background:rgba(0,0,0,.5); display:flex; align-items:center; justify-content:center; z-index:5000; pointer-events:none; opacity:0; transition:opacity 0.2s;}
-#modal.show { pointer-events:auto; opacity:1; }
-#modal-content { background:#fff; width:420px; padding:20px; border-radius:10px; max-height:90vh; overflow-y:auto; }
-.point-item { border-bottom:1px solid #ddd; padding:5px; margin-bottom:5px; }
+.point-item { border-bottom:1px solid #ddd; padding:5px; margin-bottom:5px; font-size:13px; }
 .point-item button { width:auto; padding:3px 6px; margin-left:5px; font-size:12px; }
-#toggle-btn { width:auto; cursor:pointer; margin-bottom:10px; z-index:1000; position:relative; }
 </style>
 </head>
 <body>
-<div id="app">
-  <div id="sidebar">
-    <button id="toggle-btn">≡</button>
-    <div class="content">
-      <div id="login-form">
-        <h3>Вход</h3>
-        <button id="google-btn">Войти через Google</button>
-      </div>
-      <div id="user-panel" class="hidden">
-        <div id="user-info"></div>
-        <button id="add-marker-btn">Добавить точку</button>
-        <button id="logout-btn">Выйти</button>
-        <h4>Мои точки</h4>
-        <div id="user-points" style="max-height:250px; overflow-y:auto;"></div>
-      </div>
-    </div>
-  </div>
-  <div id="map"></div>
-</div>
+
+<div id="map"></div>
+
+<button id="google-btn">Войти через Google</button>
+<button id="add-marker-btn">Добавить точку</button>
+<button id="logout-btn">Выйти</button>
+
+<div id="user-points"></div>
 
 <!-- MODAL -->
 <div id="modal">
@@ -84,6 +56,7 @@ label { font-size:14px; font-weight:bold; }
 <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
 <script>
 // ===== FIREBASE =====
 firebase.initializeApp({
@@ -94,71 +67,39 @@ firebase.initializeApp({
 const auth = firebase.auth();
 const db = firebase.firestore();
 
-// ===== ЖЁСТКАЯ ОЧИСТКА OVERLAY ОТ FIREBASE =====
-function removeFirebaseOverlay() {
-  // Удаляем все возможные overlay-элементы, которые создаёт Firebase Auth
-  document.querySelectorAll('div').forEach(el => {
-    const style = window.getComputedStyle(el);
-    if (
-      style.position === 'fixed' &&
-      style.top === '0px' &&
-      style.left === '0px' &&
-      style.width === '100%' &&
-      style.height === '100%' &&
-      (style.backgroundColor.includes('black') || style.backgroundColor.includes('rgba(0, 0, 0') || style.opacity < 1)
-    ) {
-      el.remove();
-    }
-  });
-  // Сброс возможных блокировок скролла
-  document.body.style.overflow = '';
-  document.documentElement.style.overflow = '';
-}
-
-// Вызываем очистку при загрузке и регулярно после действий с auth
-window.addEventListener('load', () => {
-  setTimeout(removeFirebaseOverlay, 100);
-  setTimeout(removeFirebaseOverlay, 500);
-  setTimeout(removeFirebaseOverlay, 1000);
-});
-
 // ===== MAP =====
 const bounds = L.latLngBounds([40.5,46.5],[55.5,87.3]);
-const map = L.map('map', {
-    maxBounds: bounds,
-    maxBoundsViscosity: 1,
-    minZoom: 5,
-    maxZoom: 12
-}).setView([48.5,68],6);
-L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    attribution: '© OpenStreetMap contributors',
-    noWrap: true
+const map = L.map('map', { 
+    maxBounds: bounds, 
+    maxBoundsViscosity: 1, 
+    minZoom: 5, 
+    maxZoom: 20, 
+    center:[48.5,68], 
+    zoom:6
+});
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{
+    attribution:'© OpenStreetMap contributors', 
+    noWrap:true
 }).addTo(map);
+
 let markers = L.layerGroup().addTo(map);
 let selectedLatLng = null;
 
 // ===== MODAL =====
 const modal = document.getElementById('modal');
-function openModal(){
-  modal.classList.add('show');
-  map.dragging.disable();
-  map.scrollWheelZoom.disable();
-}
-function closeModal(){
-  modal.classList.remove('show');
-  map.dragging.enable();
-  map.scrollWheelZoom.enable();
-  selectedLatLng = null;
-}
+function openModal(){ modal.style.display='flex'; map.dragging.disable(); map.scrollWheelZoom.disable(); }
+function closeModal(){ modal.style.display='none'; map.dragging.enable(); map.scrollWheelZoom.enable(); selectedLatLng=null; }
 modal.addEventListener('click', e=>{ if(e.target===modal) closeModal(); });
 
-// ===== LOAD MARKERS & USER POINTS (без изменений) =====
+// ===== LOAD MARKERS =====
 function loadMarkers(){
-  markers.clearLayers();
-  db.collection("3dpoints").get().then(snap=>{
-    snap.forEach(doc=>{
-      const d = doc.data();
-      L.marker([d.lat,d.lng]).addTo(markers).bindPopup(`
+    markers.clearLayers();
+    db.collection("3dpoints").get().then(snapshot=>{
+        snapshot.forEach(doc=>{
+            const d = doc.data();
+            if(d.lat && d.lng){
+                const marker = L.marker([d.lat,d.lng]);
+                marker.bindPopup(`
 <b>${d.name}</b><br>
 Принтер: ${d.printer}<br>
 Материалы: ${d.materials}<br>
@@ -168,96 +109,90 @@ WA: ${d.whatsapp||'нет'}<br>
 TG: ${d.telegram||'нет'}<br>
 IG: ${d.instagram||'нет'}
 `);
+                markers.addLayer(marker);
+            }
+        });
     });
-  });
 }
 
+// ===== LOAD USER POINTS =====
 function loadUserPoints(uid){
-  const container = document.getElementById('user-points');
-  container.innerHTML='';
-  db.collection("3dpoints").where("uid","==",uid).get().then(snap=>{
-    snap.forEach(doc=>{
-      const d = doc.data();
-      const div = document.createElement('div');
-      div.className='point-item';
-      div.innerHTML=`
+    const container = document.getElementById('user-points');
+    container.innerHTML='';
+    db.collection("3dpoints").where("uid","==",uid).get().then(snap=>{
+        snap.forEach(doc=>{
+            const d = doc.data();
+            const div = document.createElement('div');
+            div.className='point-item';
+            div.innerHTML=`
 <b>${d.name}</b> (${d.address})<br>
-Принтер: ${d.printer}, Материалы: ${d.materials}<br>
-Цена: ${d.price}, WA: ${d.whatsapp||'нет'}, TG: ${d.telegram||'нет'}, IG: ${d.instagram||'нет'}<br>
-<button onclick="editPoint('${doc.id}')">Ред.</button>
 <button onclick="deletePoint('${doc.id}')">Удалить</button>
 `;
-      container.appendChild(div);
+            container.appendChild(div);
+        });
+        container.style.display=snap.empty?'none':'block';
     });
-  });
 }
 
-// ===== EDIT & DELETE (без изменений) =====
-window.editPoint = id=>{ /* ... ваш код ... */ }
-window.deletePoint = id=>{ /* ... ваш код ... */ }
+// ===== DELETE POINT =====
+window.deletePoint = id=>{
+    if(confirm("Удалить эту точку?")){
+        db.collection("3dpoints").doc(id).delete().then(()=>{
+            loadMarkers();
+            if(auth.currentUser) loadUserPoints(auth.currentUser.uid);
+        });
+    }
+}
 
-// ===== AUTH STATE =====
+// ===== AUTH =====
 auth.onAuthStateChanged(user=>{
-  removeFirebaseOverlay(); // важно!
-  if(user){
-    document.getElementById('login-form').classList.add('hidden');
-    document.getElementById('user-panel').classList.remove('hidden');
-    document.getElementById('user-info').innerHTML=`<b>${user.displayName}</b><br><small>${user.email}</small>`;
-    loadUserPoints(user.uid);
-  } else {
-    document.getElementById('login-form').classList.remove('hidden');
-    document.getElementById('user-panel').classList.add('hidden');
-  }
-  loadMarkers();
+    if(user){
+        document.getElementById('add-marker-btn').style.display='block';
+        document.getElementById('logout-btn').style.display='block';
+        loadUserPoints(user.uid);
+    } else {
+        document.getElementById('add-marker-btn').style.display='none';
+        document.getElementById('logout-btn').style.display='none';
+        document.getElementById('user-points').style.display='none';
+    }
+    loadMarkers();
 });
 
-// ===== GOOGLE LOGIN — ТОЛЬКО redirect (самый надёжный способ) =====
-document.getElementById('google-btn').onclick = () => {
-  removeFirebaseOverlay();
-  const provider = new firebase.auth.GoogleAuthProvider();
-  auth.signInWithRedirect(provider);
-};
-
-// Обработка результата после возврата с Google
-auth.getRedirectResult()
-  .then((result) => {
-    removeFirebaseOverlay();
-    if (result.user) {
-      // Успешный вход
-    }
-  })
-  .catch((error) => {
-    removeFirebaseOverlay();
-    console.error('Redirect error:', error);
-    if (error.code !== 'auth/cancelled-popup-request') {
-      alert('Ошибка входа: ' + error.message);
-    }
-  });
-
-// ===== ADD & SAVE POINT (без изменений) =====
-document.getElementById('add-marker-btn').onclick = ()=>{ /* ... */ }
-document.getElementById('save').onclick = ()=>{ /* ... */ }
-
-// ===== LOGOUT =====
-document.getElementById('logout-btn').onclick = ()=>{ 
-  auth.signOut(); 
-  removeFirebaseOverlay();
+// ===== ADD POINT =====
+document.getElementById('add-marker-btn').onclick = ()=>{
+    if(!auth.currentUser){ alert("Сначала войдите"); return; }
+    alert("Кликни на карте, чтобы выбрать место");
+    map.once('click', e=>{ selectedLatLng=e.latlng; openModal(); });
 }
 
-// ===== SIDEBAR TOGGLE =====
-const sidebar = document.getElementById('sidebar');
-document.getElementById('toggle-btn').onclick = ()=>{
-  sidebar.classList.toggle('collapsed');
-  closeModal();
+// ===== SAVE POINT =====
+document.getElementById('save').onclick = ()=>{
+    if(!selectedLatLng) return;
+    const data={
+        name: document.getElementById('f-name').value,
+        printer: document.getElementById('f-printer').value,
+        materials: document.getElementById('f-materials').value,
+        price: document.getElementById('f-price').value,
+        address: document.getElementById('f-address').value,
+        whatsapp: document.getElementById('no-wa').checked?null:document.getElementById('f-wa').value,
+        telegram: document.getElementById('no-tg').checked?null:document.getElementById('f-tg').value,
+        instagram: document.getElementById('no-ig').checked?null:document.getElementById('f-ig').value,
+        lat: selectedLatLng.lat,
+        lng: selectedLatLng.lng,
+        uid: auth.currentUser.uid
+    };
+    db.collection("3dpoints").add(data).then(()=>{
+        closeModal(); 
+        loadMarkers(); 
+        loadUserPoints(auth.currentUser.uid);
+    }).catch(err=>alert("Ошибка: "+err.message));
 }
 
-// Дополнительная очистка каждые 500 мс после клика на кнопку входа (на всякий случай)
-document.getElementById('google-btn').addEventListener('click', () => {
-  const interval = setInterval(() => {
-    removeFirebaseOverlay();
-  }, 300);
-  setTimeout(() => clearInterval(interval), 5000);
-});
+// ===== LOGIN / LOGOUT =====
+document.getElementById('google-btn').onclick = ()=>{ auth.signInWithPopup(new firebase.auth.GoogleAuthProvider()); }
+document.getElementById('logout-btn').onclick = ()=>{ auth.signOut(); }
+
 </script>
+
 </body>
 </html>
