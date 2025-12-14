@@ -94,14 +94,21 @@ function hideButtonsAndList(){
 
 function showButtonsAndList(){
     if(auth.currentUser){
+        // Пользователь залогинен
         document.getElementById('add-marker-btn').style.display='block';
         document.getElementById('logout-btn').style.display='block';
+        document.getElementById('google-btn').style.display='none'; // прячем Google кнопку
         const userPoints = document.getElementById('user-points');
         if(userPoints.children.length>0) userPoints.style.display='block';
     } else {
+        // Пользователь не залогинен
         document.getElementById('google-btn').style.display='block';
+        document.getElementById('add-marker-btn').style.display='none';
+        document.getElementById('logout-btn').style.display='none';
+        document.getElementById('user-points').style.display='none';
     }
 }
+
 // ===== MODAL =====
 const modal = document.getElementById('modal');
 
