@@ -177,14 +177,18 @@ auth.onAuthStateChanged(user=>{
     if(user){
         document.getElementById('add-marker-btn').style.display='block';
         document.getElementById('logout-btn').style.display='block';
+        const userPoints = document.getElementById('user-points');
         loadUserPoints(user.uid);
+        userPoints.style.display = 'block'; // показываем список
     } else {
         document.getElementById('add-marker-btn').style.display='none';
         document.getElementById('logout-btn').style.display='none';
-        document.getElementById('user-points').style.display='none';
+        const userPoints = document.getElementById('user-points');
+        userPoints.style.display = 'none'; // скрываем список
     }
-    loadMarkers();
+    loadMarkers(); // все точки видны всегда
 });
+
 
 // ===== ADD POINT =====
 document.getElementById('add-marker-btn').onclick = ()=>{
