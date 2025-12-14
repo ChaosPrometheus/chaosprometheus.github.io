@@ -8,11 +8,18 @@
 <style>
 body { margin:0; font-family:Arial,sans-serif; }
 #app { display:flex; height:100vh; }
-#sidebar { width:360px; transition: all 0.3s ease; background:#fff; border-right:1px solid #ddd; padding:15px; overflow:hidden; }
-#sidebar.collapsed { width:40px; }
-#sidebar.collapsed button, 
-#sidebar.collapsed #login-form, 
-#sidebar.collapsed #user-panel { display:none; }
+#sidebar {
+  width:360px;
+  transition: all 0.3s ease;
+  background:#fff;
+  border-right:1px solid #ddd;
+  padding:15px;
+  overflow:hidden;
+  position:relative;
+}
+#sidebar.collapsed { width:40px; padding:5px 5px; }
+#sidebar .content { transition: opacity 0.3s ease; }
+#sidebar.collapsed .content { opacity:0; pointer-events:none; }
 #map { flex:1; }
 button { width:100%; padding:10px; margin:6px 0; border:none; border-radius:6px; background:#0066ff; color:#fff; font-weight:bold; cursor:pointer; }
 button:hover { background:#0050cc; }
@@ -27,7 +34,7 @@ label { font-size:14px; font-weight:bold; }
 #modal-content { background:#fff; width:420px; padding:20px; border-radius:10px; max-height:90vh; overflow-y:auto; }
 .point-item { border-bottom:1px solid #ddd; padding:5px; margin-bottom:5px; }
 .point-item button { width:auto; padding:3px 6px; margin-left:5px; font-size:12px; }
-#toggle-btn { width:auto; cursor:pointer; margin-bottom:10px; }
+#toggle-btn { width:auto; cursor:pointer; margin-bottom:10px; z-index:1000; position:relative; }
 </style>
 </head>
 <body>
@@ -35,18 +42,19 @@ label { font-size:14px; font-weight:bold; }
 <div id="app">
   <div id="sidebar">
     <button id="toggle-btn">≡</button>
+    <div class="content">
+      <div id="login-form">
+        <h3>Вход</h3>
+        <button id="google-btn">Войти через Google</button>
+      </div>
 
-    <div id="login-form">
-      <h3>Вход</h3>
-      <button id="google-btn">Войти через Google</button>
-    </div>
-
-    <div id="user-panel" class="hidden">
-      <div id="user-info"></div>
-      <button id="add-marker-btn">Добавить точку</button>
-      <button id="logout-btn">Выйти</button>
-      <h4>Мои точки</h4>
-      <div id="user-points" style="max-height:250px; overflow-y:auto;"></div>
+      <div id="user-panel" class="hidden">
+        <div id="user-info"></div>
+        <button id="add-marker-btn">Добавить точку</button>
+        <button id="logout-btn">Выйти</button>
+        <h4>Мои точки</h4>
+        <div id="user-points" style="max-height:250px; overflow-y:auto;"></div>
+      </div>
     </div>
   </div>
 
