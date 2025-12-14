@@ -170,6 +170,8 @@ const map = L.map('map',{
 
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
 let markers = L.layerGroup().addTo(map);
+loadMarkers(); // ПОКАЗЫВАЕМ ТОЧКИ ВСЕГДА
+
 
 // ===== MODAL =====
 const modal = document.getElementById('modal');
@@ -248,7 +250,6 @@ auth.onAuthStateChanged(user=>{
     document.getElementById('user-panel').classList.remove('hidden');
     document.getElementById('user-info').innerHTML =
       `<b>${user.displayName}</b><br><small>${user.email}</small>`;
-    loadMarkers();
   } else {
     document.getElementById('login-form').classList.remove('hidden');
     document.getElementById('user-panel').classList.add('hidden');
