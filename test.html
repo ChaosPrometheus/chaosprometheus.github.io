@@ -85,36 +85,40 @@ L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{
 let markers = L.layerGroup().addTo(map);
 let selectedLatLng = null;
 
-function hideButtons(){
+function hideButtonsAndList(){
     document.getElementById('google-btn').style.display='none';
     document.getElementById('add-marker-btn').style.display='none';
     document.getElementById('logout-btn').style.display='none';
+    document.getElementById('user-points').style.display='none';
 }
 
-function showButtons(){
+function showButtonsAndList(){
     if(auth.currentUser){
         document.getElementById('add-marker-btn').style.display='block';
         document.getElementById('logout-btn').style.display='block';
+        const userPoints = document.getElementById('user-points');
+        if(userPoints.children.length>0) userPoints.style.display='block';
     } else {
         document.getElementById('google-btn').style.display='block';
     }
 }
-
 // ===== MODAL =====
 const modal = document.getElementById('modal');
+
 function openModal(){
-    modal.style.display='flex'; 
-    map.dragging.disable(); 
-    map.scrollWheelZoom.disable(); 
-    hideButtons();   // <-- скрываем кнопки
+    modal.style.display='flex';
+    map.dragging.disable();
+    map.scrollWheelZoom.disable();
+    hideButtonsAndList(); // скрываем кнопки и список
 }
 
+// Закрытие модалки
 function closeModal(){
-    modal.style.display='none'; 
-    map.dragging.enable(); 
-    map.scrollWheelZoom.enable(); 
+    modal.style.display='none';
+    map.dragging.enable();
+    map.scrollWheelZoom.enable();
     selectedLatLng=null;
-    showButtons();   // <-- показываем кнопки обратно
+    showButtonsAndList(); // показываем кнопки и список заново
 }
 
 modal.addEventListener('click', e=>{ if(e.target===modal) closeModal(); });
