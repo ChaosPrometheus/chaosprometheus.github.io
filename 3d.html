@@ -30,25 +30,28 @@ label { font-size:14px; font-weight:bold; }
 <button id="logout-btn">Выйти</button>
 <img id="user-avatar" src="" title="Вы вошли">
 <div id="user-points"></div>
+
 <!-- MODAL -->
 <div id="modal">
   <div id="modal-content">
     <h3>Добавить 3D-печать</h3>
     <label>Имя</label><input id="f-name">
+    <label>Статус мастера</label><input id="f-status" value="Принимаю заказы">
     <label>Название принтера</label><input id="f-printer">
     <label>Материалы</label><input id="f-materials">
     <label>Цены</label><input id="f-price">
     <label>Адрес</label><input id="f-address">
-    <label>WhatsApp (номер телефона)</label><input id="f-wa" placeholder="например: 77012345678">
+    <label>WhatsApp</label><input id="f-wa">
     <div class="checkbox"><input type="checkbox" id="no-wa"> нет</div>
-    <label>Telegram (username)</label><input id="f-tg" placeholder="например: @username или username">
+    <label>Telegram</label><input id="f-tg">
     <div class="checkbox"><input type="checkbox" id="no-tg"> нет</div>
-    <label>Instagram (username)</label><input id="f-ig" placeholder="например: @username или username">
+    <label>Instagram</label><input id="f-ig">
     <div class="checkbox"><input type="checkbox" id="no-ig"> нет</div>
     <button id="save">Сохранить</button>
     <button type="button" onclick="closeModal()" style="background:#aaa">Отмена</button>
   </div>
 </div>
+
 <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
@@ -62,13 +65,14 @@ firebase.initializeApp({
 });
 const auth = firebase.auth();
 const db = firebase.firestore();
+
 // ===== MAP =====
 const bounds = L.latLngBounds([40.5,46.5],[55.5,87.3]);
 const map = L.map('map', {
     maxBounds: bounds,
     maxBoundsViscosity: 1,
     minZoom: 5,
-    maxZoom: 15,
+    maxZoom: 12,
     center:[48.5,68],
     zoom:6,
     zoomControl: false
@@ -79,6 +83,7 @@ L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{
 }).addTo(map);
 let markers = L.layerGroup().addTo(map);
 let selectedLatLng = null;
+
 // ===== MODAL =====
 const modal = document.getElementById('modal');
 function openModal(){
@@ -95,6 +100,7 @@ function closeModal(){
     showOverlayElements();
 }
 modal.addEventListener('click', e=>{ if(e.target===modal) closeModal(); });
+
 // ===== HIDE/SHOW ELEMENTS =====
 function hideOverlayElements(){
     document.getElementById('add-marker-btn').style.display='none';
@@ -109,6 +115,7 @@ function showOverlayElements(){
         if(userPoints.children.length>0) userPoints.style.display='block';
     }
 }
+
 // ===== LOAD MARKERS =====
 function loadMarkers(){
     markers.clearLayers();
@@ -116,31 +123,24 @@ function loadMarkers(){
         snapshot.forEach(doc=>{
             const d = doc.data();
             if(d.lat && d.lng){
-                // Функции для генерации ссылок
-                const waLink = d.whatsapp ? `https://wa.me/${d.whatsapp.replace(/[^0-9]/g, '')}` : null;
-                const tgLink = d.telegram ? `https://t.me/${d.telegram.replace(/^@/, '')}` : null;
-                const igLink = d.instagram ? `https://www.instagram.com/${d.instagram.replace(/^@/, '')}/` : null;
-
-                const waText = waLink ? `<a href="${waLink}" target="_blank">WhatsApp</a>` : 'нет';
-                const tgText = tgLink ? `<a href="${tgLink}" target="_blank">Telegram</a>` : 'нет';
-                const igText = igLink ? `<a href="${igLink}" target="_blank">Instagram</a>` : 'нет';
-
                 const marker = L.marker([d.lat,d.lng]);
+                let statusLine = d.status ? `<br><b>Статус:</b> ${d.status}` : '';
                 marker.bindPopup(`
-<b>${d.name}</b><br>
+<b>${d.name}</b>${statusLine}<br>
 Принтер: ${d.printer}<br>
 Материалы: ${d.materials}<br>
 Цена: ${d.price}<br>
 Адрес: ${d.address}<br>
-WA: ${waText}<br>
-TG: ${tgText}<br>
-IG: ${igText}
+WA: ${d.whatsapp||'нет'}<br>
+TG: ${d.telegram||'нет'}<br>
+IG: ${d.instagram||'нет'}
 `);
                 markers.addLayer(marker);
             }
         });
     });
 }
+
 // ===== LOAD USER POINTS =====
 function loadUserPoints(uid){
     const container = document.getElementById('user-points');
@@ -151,14 +151,18 @@ function loadUserPoints(uid){
             const div = document.createElement('div');
             div.className='point-item';
             div.innerHTML=`
-<b>${d.name}</b> (${d.address})<br>
+<b>${d.name}</b> (${d.address})${d.status ? ' – ' + d.status : ''}<br>
 <button onclick="deletePoint('${doc.id}')">Удалить</button>
 `;
             container.appendChild(div);
         });
         container.style.display=snap.empty?'none':'block';
+
+        // Управление кнопкой добавления: скрываем, если уже есть точка
+        document.getElementById('add-marker-btn').style.display = snap.empty ? 'block' : 'none';
     });
 }
+
 // ===== DELETE POINT =====
 window.deletePoint = id=>{
     if(confirm("Удалить эту точку?")){
@@ -168,15 +172,15 @@ window.deletePoint = id=>{
         });
     }
 }
+
 // ===== AUTH =====
 const avatar = document.getElementById('user-avatar');
 auth.onAuthStateChanged(user=>{
     if(user){
-        document.getElementById('add-marker-btn').style.display='block';
-        document.getElementById('logout-btn').style.display='block';
         document.getElementById('google-btn').style.display='none';
         avatar.src = user.photoURL || '';
         avatar.style.display = 'block';
+        document.getElementById('logout-btn').style.display='block';
         loadUserPoints(user.uid);
     } else {
         document.getElementById('add-marker-btn').style.display='none';
@@ -187,6 +191,7 @@ auth.onAuthStateChanged(user=>{
     }
     loadMarkers();
 });
+
 // ===== AVATAR CLICK =====
 avatar.onclick = ()=>{
     const points = document.getElementById('user-points');
@@ -196,38 +201,57 @@ avatar.onclick = ()=>{
         points.style.display='block';
     }
 }
+
 // ===== ADD POINT =====
-document.getElementById('add-marker-btn').onclick = ()=>{
+document.getElementById('add-marker-btn').onclick = async ()=>{
     if(!auth.currentUser){ alert("Сначала войдите"); return; }
+
+    // Проверка: уже есть ли точка у пользователя
+    const snap = await db.collection("3dpoints").where("uid","==",auth.currentUser.uid).get();
+    if(!snap.empty){
+        alert("У вас уже есть одна точка. Удалите её, чтобы добавить новую.");
+        return;
+    }
+
     alert("Кликни на карте, чтобы выбрать место");
     map.once('click', e=>{ selectedLatLng=e.latlng; openModal(); });
 }
+
 // ===== SAVE POINT =====
 document.getElementById('save').onclick = ()=>{
     if(!selectedLatLng) return;
+
     const data={
-        name: document.getElementById('f-name').value,
+        name: document.getElementById('f-name').value.trim(),
+        status: document.getElementById('f-status').value.trim() || "Принимаю заказы",
         printer: document.getElementById('f-printer').value,
         materials: document.getElementById('f-materials').value,
         price: document.getElementById('f-price').value,
         address: document.getElementById('f-address').value,
-        whatsapp: document.getElementById('no-wa').checked?null:document.getElementById('f-wa').value.trim(),
-        telegram: document.getElementById('no-tg').checked?null:document.getElementById('f-tg').value.trim(),
-        instagram: document.getElementById('no-ig').checked?null:document.getElementById('f-ig').value.trim(),
+        whatsapp: document.getElementById('no-wa').checked?null:document.getElementById('f-wa').value,
+        telegram: document.getElementById('no-tg').checked?null:document.getElementById('f-tg').value,
+        instagram: document.getElementById('no-ig').checked?null:document.getElementById('f-ig').value,
         lat: selectedLatLng.lat,
         lng: selectedLatLng.lng,
         uid: auth.currentUser.uid
     };
+
+    // Простая валидация
+    if(!data.name || !data.address){
+        alert("Заполните хотя бы имя и адрес");
+        return;
+    }
+
     db.collection("3dpoints").add(data).then(()=>{
         closeModal();
         loadMarkers();
         loadUserPoints(auth.currentUser.uid);
     }).catch(err=>alert("Ошибка: "+err.message));
 }
+
 // ===== LOGIN / LOGOUT =====
 document.getElementById('google-btn').onclick = ()=>{ auth.signInWithPopup(new firebase.auth.GoogleAuthProvider()); }
 document.getElementById('logout-btn').onclick = ()=>{ auth.signOut(); }
 </script>
 </body>
-
 </html>
