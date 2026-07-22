@@ -1,134 +1,489 @@
 <!DOCTYPE html>
 <html lang="ru">
+
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>D@UREN Radio</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>D@UREN Radio</title>
 
-<style>
-body{
-    margin:0;
-    background:#111827;
-    color:#fff;
-    font-family:Arial,sans-serif;
-    display:flex;
-    justify-content:center;
-    align-items:center;
-    height:100vh;
-}
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
 
-.player{
-    width:420px;
-    background:#1f2937;
-    border-radius:20px;
-    padding:30px;
-    text-align:center;
-    box-shadow:0 0 25px rgba(255,0,60,.4);
-}
+        body {
+            background: #111827;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            overflow: hidden;
+            color: white;
+        }
 
-.logo{
-    width:160px;
-    height:160px;
-    border-radius:50%;
-    margin:auto;
-    background:#e11d48;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    font-size:30px;
-    font-weight:bold;
-}
+        .player {
+            position: relative;
+            width: 430px;
+            height: 550px;
+            background: #1f2937;
+            border-radius: 30px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding-top: 40px;
+            overflow: hidden;
 
-button{
-    margin-top:25px;
-    width:180px;
-    height:50px;
-    border:none;
-    border-radius:50px;
-    background:#e11d48;
-    color:#fff;
-    font-size:18px;
-    cursor:pointer;
-}
+            box-shadow:
+                0 0 50px rgba(255, 0, 80, .35);
+        }
 
-button:hover{
-    background:#f43f5e;
-}
+        canvas {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+        }
 
-input[type=range]{
-    width:100%;
-    margin-top:20px;
-}
+        #particles {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+        }
 
-.status{
-    margin-top:15px;
-    color:#22c55e;
-}
-</style>
+        .logo {
+            position: relative;
+            z-index: 10;
 
+            width: 170px;
+            height: 170px;
+
+            display: flex;
+            justify-content: center;
+            align-items: center;
+
+            border-radius: 50%;
+            background: #e11d48;
+
+            font-size: 32px;
+            font-weight: bold;
+
+            transition: .05s;
+
+            box-shadow:
+                0 0 20px #ff2d55,
+                0 0 60px #ff2d55,
+                0 0 100px #ff2d55;
+        }
+
+        .logo::before {
+            content: "";
+            position: absolute;
+            inset: -12px;
+            border-radius: 50%;
+            border: 4px solid #ff2d55;
+
+            box-shadow:
+                0 0 20px #ff2d55,
+                0 0 80px #ff2d55;
+        }
+
+        .title {
+            margin-top: 20px;
+            z-index: 10;
+
+            font-size: 28px;
+            font-weight: bold;
+            letter-spacing: 2px;
+        }
+
+        .status {
+            margin-top: 10px;
+            z-index: 10;
+
+            font-size: 18px;
+            color: #00ff99;
+        }
+
+        button {
+            margin-top: auto;
+            margin-bottom: 25px;
+
+            width: 220px;
+            height: 55px;
+
+            border: none;
+            border-radius: 50px;
+
+            background: #e11d48;
+            color: white;
+
+            font-size: 20px;
+            cursor: pointer;
+            z-index: 10;
+
+            transition: .3s;
+        }
+
+        button:hover {
+            background: #ff2d55;
+
+            box-shadow:
+                0 0 20px #ff2d55;
+        }
+
+        input[type="range"] {
+            width: 85%;
+            margin-bottom: 20px;
+            z-index: 10;
+        }
+    </style>
 </head>
+
 <body>
 
-<div class="player">
+    <div class="player">
 
-<div class="logo">
-D@UREN
-</div>
+        <canvas id="bars"></canvas>
+        <canvas id="particles"></canvas>
 
-<h2>D@UREN Radio</h2>
+        <div class="logo">
+            D@UREN
+        </div>
 
-<button id="playBtn">▶ Play</button>
+        <div class="title">
+            D@UREN RADIO
+        </div>
 
-<br>
+        <div class="status" id="status">
+            Stopped
+        </div>
 
-<input id="volume" type="range" min="0" max="100" value="80">
+        <button id="playBtn">
+            ▶ PLAY
+        </button>
 
-<div class="status" id="status">
-Stopped
-</div>
+        <input
+            id="volume"
+            type="range"
+            min="0"
+            max="100"
+            value="80">
 
-</div>
+    </div>
 
-<audio id="radio">
-    <source src="https://fire.doscast.com:8050/stream/;" type="audio/mpeg">
-</audio>
+    <audio id="radio" crossorigin="anonymous">
+        <source
+            src="https://fire.doscast.com:8050/stream/;"
+            type="audio/mpeg">
+    </audio>
 
-<script>
+    <script>
 
-const radio=document.getElementById("radio");
-const btn=document.getElementById("playBtn");
-const volume=document.getElementById("volume");
-const status=document.getElementById("status");
+// ==========================
+// Элементы страницы
+// ==========================
 
-radio.volume=0.8;
+const radio = document.getElementById("radio");
+const play = document.getElementById("playBtn");
+const status = document.getElementById("status");
+const volume = document.getElementById("volume");
+const logo = document.querySelector(".logo");
 
-btn.onclick=function(){
+// ==========================
+// Настройки аудио
+// ==========================
 
-if(radio.paused){
+radio.volume = 0.8;
 
-radio.play();
+const AudioContext = window.AudioContext || window.webkitAudioContext;
+const ctx = new AudioContext();
 
-btn.innerHTML="⏸ Stop";
+const source = ctx.createMediaElementSource(radio);
+const analyser = ctx.createAnalyser();
 
-status.innerHTML="LIVE";
+source.connect(analyser);
+analyser.connect(ctx.destination);
 
-}else{
+analyser.fftSize = 256;
 
-radio.pause();
+const bufferLength = analyser.frequencyBinCount;
+const data = new Uint8Array(bufferLength);
 
-btn.innerHTML="▶ Play";
+// ==========================
+// Canvas спектра
+// ==========================
 
-status.innerHTML="Stopped";
+const canvas = document.getElementById("bars");
+const c = canvas.getContext("2d");
+
+canvas.width = 430;
+canvas.height = 650;
+
+// ==========================
+// Canvas частиц
+// ==========================
+
+const pcanvas = document.getElementById("particles");
+const pc = pcanvas.getContext("2d");
+
+pcanvas.width = 430;
+pcanvas.height = 650;
+
+// ==========================
+// Создание частиц
+// ==========================
+
+const particles = [];
+
+for (let i = 0; i < 80; i++) {
+
+    particles.push({
+        x: Math.random() * 430,
+        y: Math.random() * 650,
+        r: Math.random() * 3 + 1,
+        s: Math.random() * 2 + 0.5
+    });
 
 }
 
+// ==========================
+// Рисование частиц
+// ==========================
+
+function drawParticles() {
+
+    pc.clearRect(0, 0, 430, 650);
+
+    particles.forEach(p => {
+
+        p.y -= p.s;
+
+        if (p.y < 0) {
+
+            p.y = 650;
+            p.x = Math.random() * 430;
+
+        }
+
+        pc.beginPath();
+        pc.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+
+        pc.fillStyle = "rgba(255,255,255,.6)";
+        pc.shadowBlur = 10;
+        pc.shadowColor = "#ffffff";
+
+        pc.fill();
+
+    });
+
 }
 
-volume.oninput=function(){
+// ==========================
+// Основной визуализатор
+// ==========================
 
-radio.volume=this.value/100;
+function drawBars() {
+
+    requestAnimationFrame(drawBars);
+
+    analyser.getByteFrequencyData(data);
+
+    c.clearRect(0, 0, 430, 650);
+
+    drawParticles();
+
+    let sum = 0;
+
+    for (let i = 0; i < bufferLength; i++) {
+        sum += data[i];
+    }
+
+    const avg = sum / bufferLength;
+
+    const scale = 1 + avg / 350;
+
+    logo.style.transform = `scale(${scale})`;
+
+    logo.style.boxShadow = `
+        0 0 ${20 + avg / 5}px #ff2d55,
+        0 0 ${60 + avg}px #ff2d55,
+        0 0 ${120 + avg * 2}px #ff2d55
+    `;
+
+    const cx = 215;
+    const cy = 155;
+    const radius = 120;
+
+    // ======================
+    // Круговой эквалайзер
+    // ======================
+
+    for (let i = 0; i < 128; i++) {
+
+        const value = data[i] * 0.9;
+
+        const angle =
+            (Math.PI * 2 / 128) * i - Math.PI / 2;
+
+        const x1 =
+            cx + Math.cos(angle) * radius;
+
+        const y1 =
+            cy + Math.sin(angle) * radius;
+
+        const x2 =
+            cx + Math.cos(angle) * (radius + value);
+
+        const y2 =
+            cy + Math.sin(angle) * (radius + value);
+
+        const hue =
+            i * 2.8 + performance.now() / 25;
+
+        c.strokeStyle = `hsl(${hue},100%,60%)`;
+        c.shadowColor = `hsl(${hue},100%,60%)`;
+        c.shadowBlur = 20;
+        c.lineWidth = 3;
+
+        c.beginPath();
+        c.moveTo(x1, y1);
+        c.lineTo(x2, y2);
+        c.stroke();
+
+    }
+
+    // ======================
+    // Светящиеся точки
+    // ======================
+
+    for (let i = 0; i < 64; i++) {
+
+        const value = data[i];
+
+        const angle =
+            (Math.PI * 2 / 64) * i +
+            performance.now() / 2500;
+
+        const r = 90 + value * 0.35;
+
+        const x =
+            cx + Math.cos(angle) * r;
+
+        const y =
+            cy + Math.sin(angle) * r;
+
+        c.beginPath();
+        c.arc(
+            x,
+            y,
+            2 + value / 60,
+            0,
+            Math.PI * 2
+        );
+
+        c.fillStyle = `hsl(${i * 6},100%,65%)`;
+        c.shadowBlur = 25;
+        c.shadowColor = c.fillStyle;
+
+        c.fill();
+
+    }
 
 }
+
+// Запуск анимации
+drawBars();
+
+// ===================================
+// Кнопка PLAY / STOP
+// ===================================
+
+play.onclick = async () => {
+
+    if (radio.paused) {
+
+        try {
+
+            await ctx.resume();
+            await radio.play();
+
+            play.innerHTML = "⏸ STOP";
+
+            status.innerHTML = "🟢 LIVE";
+            status.style.color = "#00ff99";
+
+        } catch (error) {
+
+            status.innerHTML = "Ошибка запуска";
+            status.style.color = "#ff5555";
+
+            console.error(error);
+
+        }
+
+    } else {
+
+        radio.pause();
+
+        play.innerHTML = "▶ PLAY";
+
+        status.innerHTML = "Stopped";
+        status.style.color = "#ffffff";
+
+    }
+
+};
+
+// ===================================
+// Громкость
+// ===================================
+
+volume.addEventListener("input", () => {
+
+    radio.volume = volume.value / 100;
+
+});
+
+// ===================================
+// События плеера
+// ===================================
+
+radio.addEventListener("playing", () => {
+
+    status.innerHTML = "🟢 LIVE";
+    status.style.color = "#00ff99";
+
+});
+
+radio.addEventListener("pause", () => {
+
+    status.innerHTML = "Stopped";
+    status.style.color = "#ffffff";
+
+});
+
+radio.addEventListener("waiting", () => {
+
+    status.innerHTML = "Буферизация...";
+    status.style.color = "#ffd54a";
+
+});
+
+radio.addEventListener("error", () => {
+
+    status.innerHTML = "Ошибка потока";
+    status.style.color = "#ff5555";
+
+});
+
+// ===================================
+// Закрытие документа
+// ===================================
 
 </script>
 
