@@ -1,332 +1,136 @@
 <!DOCTYPE html>
-<html lang="kk">
+<html lang="ru">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Қызметтер - Керемет Қызметтер</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body {
-            font-family: 'Inter', sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: #333;
-            min-height: 100vh;
-            overflow-x: hidden;
-        }
-        header {
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(20px);
-            color: white;
-            padding: 2.5rem 1rem;
-            text-align: center;
-            position: relative;
-            overflow: hidden;
-        }
-        header::before {
-            content: '';
-            position: absolute;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background: linear-gradient(45deg, transparent, rgba(255,255,255,0.1), transparent);
-            animation: shimmer 4s infinite;
-        }
-        @keyframes shimmer { 0% { transform: translateX(-100%); } 100% { transform: translateX(100%); } }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>D@UREN Radio</title>
 
-        h1 { font-size: 3rem; font-weight: 700; margin-bottom: 0.5rem; }
-        @keyframes fadeInUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
-        h1 { animation: fadeInUp 1s ease forwards; }
+<style>
+body{
+    margin:0;
+    background:#111827;
+    color:#fff;
+    font-family:Arial,sans-serif;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    height:100vh;
+}
 
-        nav {
-            display: flex;
-            justify-content: center;
-            gap: 1rem;
-            margin: 2rem 0;
-            flex-wrap: wrap;
-        }
-        nav button {
-            padding: 12px 28px;
-            border: none;
-            background: rgba(255,255,255,0.2);
-            color: white;
-            cursor: pointer;
-            border-radius: 50px;
-            font-weight: 600;
-            transition: all 0.3s ease;
-            backdrop-filter: blur(10px);
-            border: 2px solid rgba(255,255,255,0.3);
-        }
-        nav button:hover { background: rgba(255,255,255,0.3); transform: translateY(-3px); box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
-        nav button.active { background: white; color: #667eea; }
+.player{
+    width:420px;
+    background:#1f2937;
+    border-radius:20px;
+    padding:30px;
+    text-align:center;
+    box-shadow:0 0 25px rgba(255,0,60,.4);
+}
 
-        .container { max-width: 1200px; margin: 0 auto; padding: 4rem 2rem; }
-        .services-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 2rem; }
+.logo{
+    width:160px;
+    height:160px;
+    border-radius:50%;
+    margin:auto;
+    background:#e11d48;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:30px;
+    font-weight:bold;
+}
 
-        .service {
-            background: rgba(255, 255, 255, 0.95);
-            border-radius: 24px;
-            padding: 2.5rem;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.1);
-            border: 1px solid rgba(255,255,255,0.2);
-            opacity: 0;
-            transform: translateY(50px);
-            transition: all 0.6s ease;
-            position: relative;
-            overflow: hidden;
-        }
-        .service.visible { opacity: 2; transform: translateY(0); }
-        .service::before {
-            content: '';
-            position: absolute;
-            top: 0; left: 0; right: 0;
-            height: 5px;
-            background: linear-gradient(90deg, #667eea, #764ba2, #f093fb, #f5576c);
-            background-size: 300% 300%;
-            animation: gradientShift 4s ease infinite;
-        }
-        @keyframes gradientShift { 0%,100% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } }
+button{
+    margin-top:25px;
+    width:180px;
+    height:50px;
+    border:none;
+    border-radius:50px;
+    background:#e11d48;
+    color:#fff;
+    font-size:18px;
+    cursor:pointer;
+}
 
-        .service-icon {
-            width: 80px; height: 80px;
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            border-radius: 20px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-bottom: 1.5rem;
-            font-size: 2.2rem;
-            color: white;
-            box-shadow: 0 10px 30px rgba(102,126,234,0.4);
-        }
-        .service h2 {
-            font-size: 1.6rem;
-            color: #2d3748;
-            margin-bottom: 1rem;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        .service p {
-            line-height: 1.8;
-            color: #4a5568;
-            font-size: 1.1rem;
-            margin-bottom: 1.5rem;
-        }
-        .highlight { color: #667eea; font-weight: 600; }
+button:hover{
+    background:#f43f5e;
+}
 
-        .cta-button {
-            display: inline-block;
-            padding: 12px 32px;
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            color: white;
-            text-decoration: none;
-            border-radius: 50px;
-            font-weight: 600;
-            transition: all 0.3s ease;
-            box-shadow: 0 5px 20px rgba(102,126,234,0.4);
-        }
-        .cta-button:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 15px 30px rgba(102,126,234,0.6);
-        }
+input[type=range]{
+    width:100%;
+    margin-top:20px;
+}
 
-        footer {
-            text-align: center;
-            padding: 2rem;
-            background: rgba(0,0,0,0.15);
-            color: white;
-            backdrop-filter: blur(20px);
-        }
-        .scroll-indicator {
-            position: fixed;
-            top: 0; left: 0;
-            width: 0%;
-            height: 4px;
-            background: linear-gradient(90deg, #667eea, #f093fb);
-            z-index: 9999;
-            transition: width 0.2s ease;
-        }
+.status{
+    margin-top:15px;
+    color:#22c55e;
+}
+</style>
 
-        @media (max-width: 768px) {
-            h1 { font-size: 2.3rem; }
-            .services-grid { grid-template-columns: 1fr; }
-            .container { padding: 2rem 1rem; }
-        }
-    </style>
 </head>
 <body>
 
-    <div class="scroll-indicator" id="scrollIndicator"></div>
+<div class="player">
 
-    <header>
-        <h1 id="title"><i class="fas fa-tools"></i> Қызметтер</h1>
-        <p id="subtitle" style="font-size:1.3rem; opacity:0.9;">Сапалы және жылдам қызметтер сізге арналған!</p>
-        <div style="margin-top:1.5rem;">
-            <a href="https://t.me/ChaosPrometheus" target="_blank" style="color:#fff; margin:0 15px; text-decoration:none; font-weight:600;">Telegram</a>
-            <a href="https://wa.me/77053894339" target="_blank" style="color:#fff; text-decoration:none; font-weight:600;">WhatsApp</a>
-        </div>
-    </header>
+<div class="logo">
+D@
+</div>
 
-    <nav>
-        <button class="active" onclick="changeLanguage('kk')">Қазақша</button>
-        <button onclick="changeLanguage('ru')">Русский</button>
-    </nav>
+<h2>D@UREN Radio</h2>
 
-    <div class="container">
-        <div class="services-grid">
+<button id="playBtn">▶ Play</button>
 
-            <!-- IPTV -->
-            <div class="service">
-                <div class="service-icon"><i class="fas fa-tv"></i></div>
-                <h2 id="iptv-title"></h2>
-                <p id="iptv-text"></p>
-            </div>
+<br>
 
-            <!-- PC Repair -->
-            <div class="service">
-                <div class="service-icon"><i class="fas fa-tools"></i></div>
-                <h2 id="pc-title"></h2>
-                <p id="pc-text"></p>
-            </div>
+<input id="volume" type="range" min="0" max="100" value="80">
 
-            <!-- 3D Print -->
-            <div class="service">
-                <div class="service-icon"><i class="fas fa-cube"></i></div>
-                <h2 id="print-title"></h2>
-                <p id="print-text"></p>
-            </div>
+<div class="status" id="status">
+Stopped
+</div>
 
-            <!-- Arduino -->
-            <div class="service">
-                <div class="service-icon"><i class="fas fa-robot"></i></div>
-                <h2 id="arduino-title"></h2>
-                <p id="arduino-text"></p>
-            </div>
+</div>
 
-            <!-- Website -->
-            <div class="service">
-                <div class="service-icon"><i class="fas fa-laptop-code"></i></div>
-                <h2 id="site-title"></h2>
-                <p id="site-text"></p>
-            </div>
+<audio id="radio">
+    <source src="https://fire.doscast.com:8050/stream/;" type="audio/mpeg">
+</audio>
 
-            <!-- Telegram Bot -->
-            <div class="service">
-                <div class="service-icon"><i class="fab fa-telegram-plane"></i></div>
-                <h2 id="bot-title"></h2>
-                <p id="bot-text"></p>
-            </div>
+<script>
 
-            <!-- Satellite -->
-            <div class="service">
-                <div class="service-icon"><i class="fas fa-satellite"></i></div>
-                <h2 id="satellite-title"></h2>
-                <p id="satellite-text"></p>
-            </div>
+const radio=document.getElementById("radio");
+const btn=document.getElementById("playBtn");
+const volume=document.getElementById("volume");
+const status=document.getElementById("status");
 
-            <!-- CCTV -->
-            <div class="service">
-                <div class="service-icon"><i class="fas fa-video"></i></div>
-                <h2 id="cctv-title"></h2>
-                <p id="cctv-text"></p>
-            </div>
+radio.volume=0.8;
 
-            <!-- Video Digitization -->
-            <div class="service">
-                <div class="service-icon"><i class="fas fa-film"></i></div>
-                <h2 id="videotape-title"></h2>
-                <p id="videotape-text"></p>
-            </div>
+btn.onclick=function(){
 
-            <div class="service">
-                <div class="service-icon"><i class="fas fa-code"></i></div>
-                <h2 id="programming-title"></h2>
-                <p id="programming-text"></p>
-            </div>
-            
-            <div class="service">
-                <div class="service-icon"><i class="fas fa-cube"></i></div>
-                <h2 id="modeling3d-title"></h2>
-                <p id="modeling3d-text"></p>
-            </div>
+if(radio.paused){
 
-        </div>
-    </div>
+radio.play();
 
-    <footer>
-        <p id="footer-text">© 2025 Қызметтер | <a href="https://t.me/ChaosPrometheus" style="color:#fff;">Telegram</a></p>
-    </footer>
+btn.innerHTML="⏸ Stop";
 
-    <script>
-        const translations = {
-            kk: {
-                title: '<i class="fas fa-tools"></i> Қызметтер',
-                subtitle: 'Сапалы және жылдам қызметтер сізге арналған!',
-                iptv: { title: '<i class="fas fa-play-circle"></i> IPTV қосу', text: 'Теледидарға қосылып, Android-қондырғы, Smart TV немесе смартфон арқылы сүйікті арналарыңызды тамашалаңыз!<br>HD, SD және UHD арналар қолжетімді!<br>Ұлттық арналар: Қазақстан, Ресей, Украина, Беларусь...<br>Жылдам және қарапайым қосылу!<br>Android-қондырғыларды сатамын және баптаймын.',},
-                pc: { title: '<i class="fas fa-hammer"></i> Компьютер жөндеу', text: 'Жылдам және сапалы жөндеу!<br>Компьютерді диагностикалау және жөндеу<br>Windows, Linux орнату<br><span class="highlight">Вирустарды жою</span><br>Деректерді қалпына келтіру',},
-                print: { title: '<i class="fas fa-print"></i> 3D басып шығару', text: 'Creality Ender 3 V2 құрылғыларында сапалы басып шығару!<br>STL, OBJ үлгілерінен басып шығару<br><span class="highlight">Шағын бөлшектер</span> және прототиптер<br>Барлық түстерде пластик',},
-                arduino: { title: '<i class="fas fa-microchip"></i> Arduino жобаларын әзірлеу', text: 'Arduino және ESP8266 жүйелерінде жобалар әзірлеуде!<br>Сенсорлық жүйелер – температура, ылғалдылық...<br><span class="highlight">Автоматтандыру</span> – смарт үй, IoT<br>Толық цикл: құрастыру + бағдарламалау',},
-                site: { title: '<i class="fas fa-globe"></i> Арнайы веб-сайт әзірлеу', text: 'Заманауи және жауапты дизайн!<br>Сайтты нөлден бастап жасау<br><span class="highlight">Лендингтер, интернет-дүкендер</span><br>SEO, хостинг, домен',},
-                bot: { title: '<i class="fab fa-telegram"></i> Telegram-бот әзірлеу', text: 'Python / Aiogram негізінде!<br>Автожауаптар, мәзірлер, батырмалар<br><span class="highlight">Күрделі жүйелер</span> (тапсырыс қабылдау, бақылау)<br>API, дерекқор қосу',},
-                satellite: { title: '<i class="fas fa-satellite"></i> Спутниктік тарелка орнату', text: 'Сапалы сигнал үшін дәл баптау!<br>Орнату және конфигурациялау<br><span class="highlight">Kazsat-3, Eutelsat 36C, <br>Intelsat 15</span><br>Кепілдік және қолдау',},
-                cctv: { title: '<i class="fas fa-video"></i> Бейнебақылау орнату', text: 'Қауіпсіздік үшін IP және аналогтық камералар!<br>Орнату және баптау<br><span class="highlight">Қашықтан бақылау</span><br>Мобильді қосымшалар, кепілдік',},
-                videotape: { title: '<i class="fas fa-film"></i> Видео кассеталарды цифрлау', text: 'Естеліктеріңізді сақтаңыз!<br>VHS, VHS-C, Hi8, MiniDV және басқа форматтар<br>Бейне мен дыбысты қалпына келтіру және тазалау<br>USB, DVD немесе бұлтқа жазу',},
-                programming: { title: '<i class="fas fa-code"></i> Бағдарламалау', text: 'Кәсіби әзірлеу Python және Java тілдерінде<br>Telegram боттар, қосымшалар, скрипттер<br><span class="highlight">Процестерді автоматтандыру</span> (Excel, веб-скрапинг, парсинг)<br>Жеке тапсырмаларға арналған бағдарламалар<br>Жылдам, сапалы және қолжетімді бағамен',},
-                modeling3d: {title: '<i class="fas fa-cube"></i> 3D моделдеу',text: `🧩 Кез келген күрделілікке арналған кәсіби <span class="highlight">3D моделдеу</span> қызметі.<br>🎨 Сызба, фото немесе идея бойынша модельдер жасау.<br>📦 3D басып шығаруға дайындау, STL түзету, модельдерді оңтайландыру.<br>`,},
+status.innerHTML="LIVE";
 
-                footer: '© 2025 Қызметтер | <a href="https://t.me/ChaosPrometheus" style="color:#fff;">Telegram</a>'
-            },
-            ru: {
-                title: '<i class="fas fa-tools"></i> Услуги',
-                subtitle: 'Качественные и быстрые услуги для вас!',
-                iptv: { title: '<i class="fas fa-play-circle"></i> Подключение IPTV', text: 'Подключитесь к телевизору и наслаждайтесь любимыми каналами через Android-приставку, Smart TV или смартфон!<br>HD, SD и UHD каналы доступны!<br>Национальные каналы: Казахстан, Россия, Украина, Беларусь...<br>Быстрое и простое подключение!<br>Продаю и настраиваю Android-приставки.',},
-                pc: { title: '<i class="fas fa-hammer"></i> Ремонт компьютеров', text: 'Быстрый и качественный ремонт!<br>Диагностика и ремонт компьютеров<br>Установка Windows, Linux<br><span class="highlight">Удаление вирусов</span><br>Восстановление данных',},
-                print: { title: '<i class="fas fa-print"></i> 3D печать', text: 'Качественная печать на Creality Ender 3 V2!<br>Печать по моделям STL, OBJ<br><span class="highlight">Мелкие детали</span> и прототипы<br>Пластик всех цветов',},
-                arduino: { title: '<i class="fas fa-microchip"></i> Проекты на Arduino', text: 'Разработка проектов на Arduino и ESP8266!<br>Датчики температуры, влажности и др.<br><span class="highlight">Автоматизация</span> – умный дом, IoT<br>Полный цикл: сборка + программирование',},
-                site: { title: '<i class="fas fa-globe"></i> Разработка сайтов на заказ', text: 'Современный и адаптивный дизайн!<br>Создание сайтов с нуля<br><span class="highlight">Лендинги, интернет-магазины</span><br>SEO, хостинг, домен',},
-                bot: { title: '<i class="fab fa-telegram"></i> Разработка Telegram-ботов', text: 'На Python / Aiogram!<br>Автоответчики, меню, кнопки<br><span class="highlight">Сложные системы</span> (приём заказов, контроль)<br>Подключение API и БД',},
-                satellite: { title: '<i class="fas fa-satellite"></i> Настройка спутниковых антенн', text: 'Точная настройка для качественного сигнала!<br>Установка и конфигурация<br><span class="highlight">Kazsat-3, Eutelsat 36C,<br> Intelsat 15</span><br>Гарантия и поддержка',},
-                cctv: { title: '<i class="fas fa-video"></i> Установка видеонаблюдения', text: 'Безопасность с IP и аналоговыми камерами!<br>Установка и настройка<br><span class="highlight">Удалённый просмотр</span><br>Мобильные приложения, гарантия',},
-                videotape: { title: '<i class="fas fa-film"></i> Оцифровка видеокассет', text: 'Сохраните свои воспоминания!<br>VHS, VHS-C, Hi8, MiniDV и другие форматы<br>Восстановление видео и звука<br>Запись на USB, DVD или в облако',},
-                programming: { title: '<i class="fas fa-code"></i> Программирование', text: 'Профессиональная разработка на Python и Java<br>Telegram-боты, приложения, скрипты<br><span class="highlight">Автоматизация процессов</span> (Excel, веб-скрапинг, парсинг)<br>Программы под ваши индивидуальные задачи<br>Быстро, качественно и по доступной цене',},
-                modeling3d: {title: '<i class="fas fa-cube"></i> 3D моделирование',text: `🧩 Профессиональное <span class="highlight">3D моделирование</span> для печати, визуализации и проектов любой сложности.<br>🎨 Создание моделей по чертежам, фото или вашим идеям.<br>📦 Подготовка к 3D-печати, правка STL, оптимизация моделей.<br>`,},
+}else{
 
-                footer: '© 2025 Услуги | <a href="https://t.me/ChaosPrometheus" style="color:#fff;">Telegram</a>'
-            }
-        };
+radio.pause();
 
-        // При загрузке страницы — сразу заполняем казахский
-        window.addEventListener('DOMContentLoaded', () => changeLanguage('kk'));
+btn.innerHTML="▶ Play";
 
-        // Скролл-индикатор
-        window.addEventListener('scroll', () => {
-            const percent = (window.scrollY / (document.body.offsetHeight - window.innerHeight)) * 100;
-            document.getElementById('scrollIndicator').style.width = percent + '%';
-        });
+status.innerHTML="Stopped";
 
-        // Анимация появления карточек
-        const observer = new IntersectionObserver((entries) => {
-            entries.forEach(e => e.isIntersecting && e.target.classList.add('visible'));
-        }, { threshold: 0.1 });
-        document.querySelectorAll('.service').forEach(s => observer.observe(s));
+}
 
-        // Смена языка
-        function changeLanguage(lang) {
-            document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
-            document.querySelector(`nav button[onclick="changeLanguage('${lang}')"]`).classList.add('active');
+}
 
-            document.getElementById('title').innerHTML = translations[lang].title;
-            document.getElementById('subtitle').innerText = translations[lang].subtitle;
+volume.oninput=function(){
 
-            const keys = ['iptv','pc','print','arduino','site','bot','satellite','cctv','videotape','programming','modeling3d',];
-            keys.forEach(k => {
-                document.getElementById(k + '-title').innerHTML = translations[lang][k].title;
-                document.getElementById(k + '-text').innerHTML = translations[lang][k].text;
-            });
+radio.volume=this.value/100;
 
-            document.getElementById('footer-text').innerHTML = translations[lang].footer;
-            document.documentElement.lang = lang;
-        }
-    </script>
+}
+
+</script>
+
 </body>
 </html>
