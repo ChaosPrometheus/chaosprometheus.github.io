@@ -102,7 +102,7 @@
         }
 
         .status {
-            margin-top: 10px;
+            margin-top: 50px;
             z-index: 10;
 
             font-size: 18px;
@@ -152,11 +152,7 @@
         <canvas id="particles"></canvas>
 
         <div class="logo">
-            D@UREN
-        </div>
-
-        <div class="title">
-            D@UREN RADIO
+            D@UREN 
         </div>
 
         <div class="status" id="status">
@@ -167,12 +163,6 @@
             ▶ PLAY
         </button>
 
-        <input
-            id="volume"
-            type="range"
-            min="0"
-            max="100"
-            value="80">
 
     </div>
 
@@ -191,14 +181,12 @@
 const radio = document.getElementById("radio");
 const play = document.getElementById("playBtn");
 const status = document.getElementById("status");
-const volume = document.getElementById("volume");
 const logo = document.querySelector(".logo");
 
 // ==========================
 // Настройки аудио
 // ==========================
 
-radio.volume = 0.8;
 
 const AudioContext = window.AudioContext || window.webkitAudioContext;
 const ctx = new AudioContext();
@@ -221,8 +209,8 @@ const data = new Uint8Array(bufferLength);
 const canvas = document.getElementById("bars");
 const c = canvas.getContext("2d");
 
-canvas.width = 430;
-canvas.height = 650;
+canvas.width = 300;
+canvas.height = 500;
 
 // ==========================
 // Canvas частиц
@@ -240,7 +228,7 @@ pcanvas.height = 650;
 
 const particles = [];
 
-for (let i = 0; i < 80; i++) {
+for (let i = 0; i < 25; i++) {
 
     particles.push({
         x: Math.random() * 430,
@@ -274,7 +262,7 @@ function drawParticles() {
         pc.arc(p.x, p.y, p.r, 0, Math.PI * 2);
 
         pc.fillStyle = "rgba(255,255,255,.6)";
-        pc.shadowBlur = 10;
+        pc.shadowBlur = 3;
         pc.shadowColor = "#ffffff";
 
         pc.fill();
@@ -309,90 +297,9 @@ function drawBars() {
 
     logo.style.transform = `scale(${scale})`;
 
-    logo.style.boxShadow = `
-        0 0 ${20 + avg / 5}px #ff2d55,
-        0 0 ${60 + avg}px #ff2d55,
-        0 0 ${120 + avg * 2}px #ff2d55
-    `;
-
     const cx = 215;
     const cy = 155;
     const radius = 120;
-
-    // ======================
-    // Круговой эквалайзер
-    // ======================
-
-    for (let i = 0; i < 128; i++) {
-
-        const value = data[i] * 0.9;
-
-        const angle =
-            (Math.PI * 2 / 128) * i - Math.PI / 2;
-
-        const x1 =
-            cx + Math.cos(angle) * radius;
-
-        const y1 =
-            cy + Math.sin(angle) * radius;
-
-        const x2 =
-            cx + Math.cos(angle) * (radius + value);
-
-        const y2 =
-            cy + Math.sin(angle) * (radius + value);
-
-        const hue =
-            i * 2.8 + performance.now() / 25;
-
-        c.strokeStyle = `hsl(${hue},100%,60%)`;
-        c.shadowColor = `hsl(${hue},100%,60%)`;
-        c.shadowBlur = 20;
-        c.lineWidth = 3;
-
-        c.beginPath();
-        c.moveTo(x1, y1);
-        c.lineTo(x2, y2);
-        c.stroke();
-
-    }
-
-    // ======================
-    // Светящиеся точки
-    // ======================
-
-    for (let i = 0; i < 64; i++) {
-
-        const value = data[i];
-
-        const angle =
-            (Math.PI * 2 / 64) * i +
-            performance.now() / 2500;
-
-        const r = 90 + value * 0.35;
-
-        const x =
-            cx + Math.cos(angle) * r;
-
-        const y =
-            cy + Math.sin(angle) * r;
-
-        c.beginPath();
-        c.arc(
-            x,
-            y,
-            2 + value / 60,
-            0,
-            Math.PI * 2
-        );
-
-        c.fillStyle = `hsl(${i * 6},100%,65%)`;
-        c.shadowBlur = 25;
-        c.shadowColor = c.fillStyle;
-
-        c.fill();
-
-    }
 
 }
 
@@ -443,11 +350,7 @@ play.onclick = async () => {
 // Громкость
 // ===================================
 
-volume.addEventListener("input", () => {
 
-    radio.volume = volume.value / 100;
-
-});
 
 // ===================================
 // События плеера
