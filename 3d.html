@@ -28,8 +28,13 @@
     display: flex;
     flex-direction: column;
     gap: 8px;
-    max-width: 320px;
+    max-width: 280px;
   }
+
+/* Когда открыта панель "Мои точки" — прячем кнопки слева */
+body.panel-open .controls {
+  display: none;
+}
   button, .btn {
     padding: 10px 14px;
     border: none;
@@ -324,9 +329,12 @@ function showLoading(show) {
 
 function openPanel() {
   document.getElementById('side-panel').classList.add('open');
+  document.body.classList.add('panel-open');   // прячем кнопки
 }
+
 function closePanel() {
   document.getElementById('side-panel').classList.remove('open');
+  document.body.classList.remove('panel-open'); // возвращаем кнопки
 }
 
 // ===== MODAL =====
