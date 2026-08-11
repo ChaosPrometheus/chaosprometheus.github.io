@@ -20,7 +20,6 @@
   body { margin: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif; background: #111; color: var(--text); }
   #map { width: 100%; height: 100vh; }
 
-  /* Controls */
   .controls {
     position: fixed;
     top: 12px;
@@ -65,7 +64,6 @@
     display: none;
   }
 
-  /* Side panel */
   #side-panel {
     position: fixed;
     top: 0; right: 0;
@@ -107,7 +105,6 @@
   .edit-btn { background: #ff9800; color: #fff; }
   .delete-btn { background: var(--danger); color: #fff; }
 
-  /* Modal */
   #modal {
     position: fixed; inset: 0;
     background: rgba(0,0,0,.55);
@@ -128,7 +125,7 @@
   }
   #modal-content h3 { margin: 0 0 16px; }
   label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 4px; }
-  input[type="text"], input[type="file"] {
+  input[type="text"] {
     width: 100%;
     padding: 9px 10px;
     margin-bottom: 10px;
@@ -144,7 +141,6 @@
   #save { background: var(--success); color: #fff; }
   .cancel-btn { background: #9e9e9e; color: #fff; }
 
-  /* Loading & Toast */
   #loading {
     position: fixed; inset: 0;
     background: rgba(255,255,255,.7);
@@ -172,7 +168,6 @@
   }
   .toast.show { opacity: 1; }
 
-  /* Selecting mode */
   body.selecting-mode #map { cursor: crosshair; }
   #select-hint {
     position: fixed;
@@ -188,9 +183,7 @@
     font-size: 14px;
   }
 
-  /* Popup improvements */
   .leaflet-popup-content { min-width: 220px; }
-  .popup-photo { width: 100%; max-height: 140px; object-fit: cover; border-radius: 6px; margin-bottom: 8px; }
   .popup-contacts a { margin-right: 8px; }
 
   @media (max-width: 600px) {
@@ -255,9 +248,6 @@
     <input id="f-ig" type="text" placeholder="@username">
     <div class="checkbox"><input type="checkbox" id="no-ig"> нет Instagram</div>
 
-    <label>Фото принтера / работ (необязательно)</label>
-    <input id="f-photo" type="file" accept="image/*">
-
     <div class="modal-actions">
       <button id="save">Сохранить</button>
       <button type="button" class="cancel-btn" onclick="closeModal()">Отмена</button>
@@ -271,7 +261,6 @@
 <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-storage-compat.js"></script>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
 
@@ -280,12 +269,10 @@
 firebase.initializeApp({
   apiKey: "AIzaSyCRZOp8TGfz2f4pvh3S69zixDKkAP3wmNo",
   authDomain: "kaz3d-c2304.firebaseapp.com",
-  projectId: "kaz3d-c2304",
-  storageBucket: "kaz3d-c2304.appspot.com"
+  projectId: "kaz3d-c2304"
 });
 const auth = firebase.auth();
 const db = firebase.firestore();
-const storage = firebase.storage();
 
 // ===== MAP =====
 const bounds = L.latLngBounds([40.5, 46.5], [55.5, 87.3]);
@@ -311,7 +298,7 @@ map.addLayer(markers);
 
 let selectedLatLng = null;
 let editingId = null;
-let allPoints = []; // для поиска
+let allPoints = [];
 let unsubscribeMarkers = null;
 let unsubscribeUser = null;
 
@@ -373,7 +360,6 @@ function clearForm() {
     document.getElementById(id).value = '';
     document.getElementById(id).classList.remove('error');
   });
-  document.getElementById('f-photo').value = '';
   document.getElementById('no-wa').checked = false;
   document.getElementById('no-tg').checked = false;
   document.getElementById('no-ig').checked = false;
@@ -426,12 +412,7 @@ function loadMarkers() {
       const tgLink = d.telegram ? `https://t.me/${String(d.telegram).replace(/^@/, '')}` : null;
       const igLink = d.instagram ? `https://www.instagram.com/${String(d.instagram).replace(/^@/, '')}/` : null;
 
-      const photoHtml = d.photoURL
-        ? `<img class="popup-photo" src="${escapeHtml(d.photoURL)}" alt="photo">`
-        : '';
-
       const popupContent = `
-        ${photoHtml}
         <b>${escapeHtml(d.name)}</b><br>
         Принтер: ${escapeHtml(d.printer || '—')}<br>
         Материалы: ${escapeHtml(d.materials || '—')}<br>
@@ -569,20 +550,6 @@ document.getElementById('save').onclick = async () => {
   showLoading(true);
 
   try {
-    let photoURL = null;
-    const fileInput = document.getElementById('f-photo');
-    if (fileInput.files && fileInput.files[0]) {
-      const file = fileInput.files[0];
-      if (file.size > 5 * 1024 * 1024) {
-        showToast('Фото слишком большое (макс 5 МБ)');
-        showLoading(false);
-        return;
-      }
-      const ref = storage.ref().child(`points/${auth.currentUser.uid}/${Date.now()}_${file.name}`);
-      await ref.put(file);
-      photoURL = await ref.getDownloadURL();
-    }
-
     const data = {
       name: document.getElementById('f-name').value.trim(),
       printer: document.getElementById('f-printer').value.trim(),
@@ -598,11 +565,7 @@ document.getElementById('save').onclick = async () => {
       updatedAt: firebase.firestore.FieldValue.serverTimestamp()
     };
 
-    if (photoURL) data.photoURL = photoURL;
-
     if (editingId) {
-      // при редактировании не перезаписываем фото, если новое не выбрано
-      if (!photoURL) delete data.photoURL;
       await db.collection("3dpoints").doc(editingId).update(data);
       showToast('Точка обновлена');
     } else {
@@ -668,7 +631,6 @@ document.getElementById('add-marker-btn').onclick = () => {
     document.body.classList.remove('selecting-mode');
     document.getElementById('select-hint').style.display = 'none';
 
-    // reverse geocode
     showLoading(true);
     const address = await reverseGeocode(e.latlng.lat, e.latlng.lng);
     document.getElementById('f-address').value = address;
@@ -720,10 +682,8 @@ function applySearchFilter() {
     const waLink = d.whatsapp ? `https://wa.me/${String(d.whatsapp).replace(/[^0-9]/g, '')}` : null;
     const tgLink = d.telegram ? `https://t.me/${String(d.telegram).replace(/^@/, '')}` : null;
     const igLink = d.instagram ? `https://www.instagram.com/${String(d.instagram).replace(/^@/, '')}/` : null;
-    const photoHtml = d.photoURL ? `<img class="popup-photo" src="${escapeHtml(d.photoURL)}" alt="photo">` : '';
 
     const popupContent = `
-      ${photoHtml}
       <b>${escapeHtml(d.name)}</b><br>
       Принтер: ${escapeHtml(d.printer || '—')}<br>
       Материалы: ${escapeHtml(d.materials || '—')}<br>
