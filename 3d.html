@@ -1,0 +1,756 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>3D-печать в Казахстане</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css"/>
+<link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css"/>
+<style>
+  :root {
+    --primary: #4285F4;
+    --success: #00c853;
+    --danger: #d33;
+    --bg: #f8f9fa;
+    --text: #222;
+    --radius: 10px;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif; background: #111; color: var(--text); }
+  #map { width: 100%; height: 100vh; }
+
+  /* Controls */
+  .controls {
+    position: fixed;
+    top: 12px;
+    left: 12px;
+    z-index: 5000;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    max-width: 320px;
+  }
+  button, .btn {
+    padding: 10px 14px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 14px;
+    box-shadow: 0 2px 8px rgba(0,0,0,.15);
+    transition: transform .15s, opacity .15s;
+  }
+  button:active { transform: scale(0.97); }
+  #google-btn { background: var(--primary); color: #fff; }
+  #add-marker-btn { background: var(--success); color: #fff; display: none; }
+  #my-location-btn { background: #fff; color: #333; display: none; }
+  #logout-btn { background: var(--danger); color: #fff; display: none; }
+  #search-box {
+    display: none;
+    padding: 10px 12px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    font-size: 14px;
+    width: 100%;
+    box-shadow: 0 2px 8px rgba(0,0,0,.1);
+  }
+
+  #user-avatar {
+    width: 44px; height: 44px;
+    border-radius: 50%;
+    border: 2px solid #fff;
+    box-shadow: 0 2px 8px rgba(0,0,0,.2);
+    cursor: pointer;
+    display: none;
+  }
+
+  /* Side panel */
+  #side-panel {
+    position: fixed;
+    top: 0; right: 0;
+    width: 340px;
+    max-width: 95vw;
+    height: 100vh;
+    background: #fff;
+    box-shadow: -4px 0 20px rgba(0,0,0,.15);
+    z-index: 4500;
+    transform: translateX(100%);
+    transition: transform .3s ease;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+  #side-panel.open { transform: translateX(0); }
+  .panel-header {
+    padding: 16px;
+    background: var(--primary);
+    color: #fff;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .panel-header h3 { margin: 0; font-size: 16px; }
+  .panel-close { background: transparent; color: #fff; font-size: 22px; padding: 0 8px; box-shadow: none; }
+  #user-points { flex: 1; overflow-y: auto; padding: 12px; }
+  .point-item {
+    border: 1px solid #eee;
+    border-radius: 8px;
+    padding: 12px;
+    margin-bottom: 10px;
+    font-size: 13px;
+    background: #fafafa;
+  }
+  .point-item b { display: block; margin-bottom: 4px; }
+  .point-actions { margin-top: 8px; display: flex; gap: 6px; }
+  .point-actions button { padding: 5px 10px; font-size: 12px; }
+  .edit-btn { background: #ff9800; color: #fff; }
+  .delete-btn { background: var(--danger); color: #fff; }
+
+  /* Modal */
+  #modal {
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,.55);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 6000;
+    padding: 16px;
+  }
+  #modal-content {
+    background: #fff;
+    width: 100%;
+    max-width: 400px;
+    padding: 20px;
+    border-radius: 14px;
+    max-height: 92vh;
+    overflow-y: auto;
+  }
+  #modal-content h3 { margin: 0 0 16px; }
+  label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 4px; }
+  input[type="text"], input[type="file"] {
+    width: 100%;
+    padding: 9px 10px;
+    margin-bottom: 10px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    font-size: 14px;
+  }
+  input.error { border-color: #d33; background: #fff5f5; }
+  .error-msg { color: #d33; font-size: 12px; margin: -6px 0 8px; display: none; }
+  .checkbox { display: flex; gap: 8px; align-items: center; font-size: 13px; margin-bottom: 10px; }
+  .modal-actions { display: flex; gap: 8px; margin-top: 8px; }
+  .modal-actions button { flex: 1; }
+  #save { background: var(--success); color: #fff; }
+  .cancel-btn { background: #9e9e9e; color: #fff; }
+
+  /* Loading & Toast */
+  #loading {
+    position: fixed; inset: 0;
+    background: rgba(255,255,255,.7);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 7000;
+    font-size: 18px;
+    font-weight: 600;
+  }
+  .toast {
+    position: fixed;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #333;
+    color: #fff;
+    padding: 12px 20px;
+    border-radius: 8px;
+    z-index: 8000;
+    font-size: 14px;
+    opacity: 0;
+    transition: opacity .3s;
+    pointer-events: none;
+  }
+  .toast.show { opacity: 1; }
+
+  /* Selecting mode */
+  body.selecting-mode #map { cursor: crosshair; }
+  #select-hint {
+    position: fixed;
+    top: 70px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #333;
+    color: #fff;
+    padding: 10px 18px;
+    border-radius: 8px;
+    z-index: 5000;
+    display: none;
+    font-size: 14px;
+  }
+
+  /* Popup improvements */
+  .leaflet-popup-content { min-width: 220px; }
+  .popup-photo { width: 100%; max-height: 140px; object-fit: cover; border-radius: 6px; margin-bottom: 8px; }
+  .popup-contacts a { margin-right: 8px; }
+
+  @media (max-width: 600px) {
+    .controls { max-width: calc(100vw - 24px); }
+    #side-panel { width: 100%; }
+  }
+</style>
+</head>
+<body>
+<div id="map"></div>
+
+<div class="controls">
+  <button id="google-btn">Войти через Google</button>
+  <img id="user-avatar" src="" title="Мои точки" alt="avatar">
+  <button id="add-marker-btn">＋ Добавить точку</button>
+  <button id="my-location-btn">📍 Моё местоположение</button>
+  <input type="text" id="search-box" placeholder="Поиск по названию, адресу, материалам...">
+  <button id="logout-btn">Выйти</button>
+</div>
+
+<div id="select-hint">Кликните на карте, чтобы выбрать место</div>
+
+<!-- Side panel -->
+<div id="side-panel">
+  <div class="panel-header">
+    <h3>Мои точки</h3>
+    <button class="panel-close" onclick="closePanel()">×</button>
+  </div>
+  <div id="user-points"></div>
+</div>
+
+<!-- Modal -->
+<div id="modal">
+  <div id="modal-content">
+    <h3 id="modal-title">Добавить 3D-печать</h3>
+    <label>Имя / Название *</label>
+    <input id="f-name" type="text">
+    <div class="error-msg" id="err-name">Обязательное поле</div>
+
+    <label>Название принтера</label>
+    <input id="f-printer" type="text">
+
+    <label>Материалы (PLA, ABS, PETG...)</label>
+    <input id="f-materials" type="text">
+
+    <label>Цены</label>
+    <input id="f-price" type="text">
+
+    <label>Адрес *</label>
+    <input id="f-address" type="text">
+    <div class="error-msg" id="err-address">Обязательное поле</div>
+
+    <label>WhatsApp (номер, например 77012345678)</label>
+    <input id="f-wa" type="text" placeholder="77012345678">
+    <div class="checkbox"><input type="checkbox" id="no-wa"> нет WhatsApp</div>
+
+    <label>Telegram (username)</label>
+    <input id="f-tg" type="text" placeholder="@username">
+    <div class="checkbox"><input type="checkbox" id="no-tg"> нет Telegram</div>
+
+    <label>Instagram (username)</label>
+    <input id="f-ig" type="text" placeholder="@username">
+    <div class="checkbox"><input type="checkbox" id="no-ig"> нет Instagram</div>
+
+    <label>Фото принтера / работ (необязательно)</label>
+    <input id="f-photo" type="file" accept="image/*">
+
+    <div class="modal-actions">
+      <button id="save">Сохранить</button>
+      <button type="button" class="cancel-btn" onclick="closeModal()">Отмена</button>
+    </div>
+  </div>
+</div>
+
+<div id="loading">Загрузка...</div>
+<div class="toast" id="toast"></div>
+
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-storage-compat.js"></script>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
+
+<script>
+// ===== FIREBASE =====
+firebase.initializeApp({
+  apiKey: "AIzaSyCRZOp8TGfz2f4pvh3S69zixDKkAP3wmNo",
+  authDomain: "kaz3d-c2304.firebaseapp.com",
+  projectId: "kaz3d-c2304",
+  storageBucket: "kaz3d-c2304.appspot.com"
+});
+const auth = firebase.auth();
+const db = firebase.firestore();
+const storage = firebase.storage();
+
+// ===== MAP =====
+const bounds = L.latLngBounds([40.5, 46.5], [55.5, 87.3]);
+const map = L.map('map', {
+  maxBounds: bounds,
+  maxBoundsViscosity: 1,
+  minZoom: 5,
+  maxZoom: 18,
+  center: [48.5, 68],
+  zoom: 6
+});
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+  attribution: '© OpenStreetMap',
+  noWrap: true
+}).addTo(map);
+
+const markers = L.markerClusterGroup({
+  maxClusterRadius: 50,
+  spiderfyOnMaxZoom: true,
+  showCoverageOnHover: false
+});
+map.addLayer(markers);
+
+let selectedLatLng = null;
+let editingId = null;
+let allPoints = []; // для поиска
+let unsubscribeMarkers = null;
+let unsubscribeUser = null;
+
+// ===== UTILS =====
+function escapeHtml(text) {
+  if (!text) return '';
+  const div = document.createElement('div');
+  div.textContent = text;
+  return div.innerHTML;
+}
+
+function showToast(msg, duration = 3000) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), duration);
+}
+
+function showLoading(show) {
+  document.getElementById('loading').style.display = show ? 'flex' : 'none';
+}
+
+function openPanel() {
+  document.getElementById('side-panel').classList.add('open');
+}
+function closePanel() {
+  document.getElementById('side-panel').classList.remove('open');
+}
+
+// ===== MODAL =====
+const modal = document.getElementById('modal');
+
+function openModal(isEdit = false) {
+  document.getElementById('modal-title').textContent = isEdit ? 'Редактировать точку' : 'Добавить 3D-печать';
+  modal.style.display = 'flex';
+  map.dragging.disable();
+  map.scrollWheelZoom.disable();
+  document.body.classList.remove('selecting-mode');
+  document.getElementById('select-hint').style.display = 'none';
+}
+
+function closeModal() {
+  modal.style.display = 'none';
+  map.dragging.enable();
+  map.scrollWheelZoom.enable();
+  selectedLatLng = null;
+  editingId = null;
+  clearForm();
+  document.body.classList.remove('selecting-mode');
+  document.getElementById('select-hint').style.display = 'none';
+}
+
+modal.addEventListener('click', e => {
+  if (e.target === modal) closeModal();
+});
+
+function clearForm() {
+  ['f-name','f-printer','f-materials','f-price','f-address','f-wa','f-tg','f-ig'].forEach(id => {
+    document.getElementById(id).value = '';
+    document.getElementById(id).classList.remove('error');
+  });
+  document.getElementById('f-photo').value = '';
+  document.getElementById('no-wa').checked = false;
+  document.getElementById('no-tg').checked = false;
+  document.getElementById('no-ig').checked = false;
+  document.querySelectorAll('.error-msg').forEach(el => el.style.display = 'none');
+}
+
+function fillForm(data) {
+  document.getElementById('f-name').value = data.name || '';
+  document.getElementById('f-printer').value = data.printer || '';
+  document.getElementById('f-materials').value = data.materials || '';
+  document.getElementById('f-price').value = data.price || '';
+  document.getElementById('f-address').value = data.address || '';
+  document.getElementById('f-wa').value = data.whatsapp || '';
+  document.getElementById('f-tg').value = data.telegram || '';
+  document.getElementById('f-ig').value = data.instagram || '';
+  document.getElementById('no-wa').checked = !data.whatsapp;
+  document.getElementById('no-tg').checked = !data.telegram;
+  document.getElementById('no-ig').checked = !data.instagram;
+}
+
+// ===== REVERSE GEOCODING =====
+async function reverseGeocode(lat, lng) {
+  try {
+    const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=18&addressdetails=1`, {
+      headers: { 'Accept-Language': 'ru' }
+    });
+    const data = await res.json();
+    return data.display_name || `${lat.toFixed(5)}, ${lng.toFixed(5)}`;
+  } catch (e) {
+    return `${lat.toFixed(5)}, ${lng.toFixed(5)}`;
+  }
+}
+
+// ===== LOAD MARKERS (real-time) =====
+function loadMarkers() {
+  if (unsubscribeMarkers) unsubscribeMarkers();
+
+  unsubscribeMarkers = db.collection("3dpoints").onSnapshot(snapshot => {
+    markers.clearLayers();
+    allPoints = [];
+
+    snapshot.forEach(doc => {
+      const d = doc.data();
+      if (!d.lat || !d.lng) return;
+
+      const point = { id: doc.id, ...d };
+      allPoints.push(point);
+
+      const waLink = d.whatsapp ? `https://wa.me/${String(d.whatsapp).replace(/[^0-9]/g, '')}` : null;
+      const tgLink = d.telegram ? `https://t.me/${String(d.telegram).replace(/^@/, '')}` : null;
+      const igLink = d.instagram ? `https://www.instagram.com/${String(d.instagram).replace(/^@/, '')}/` : null;
+
+      const photoHtml = d.photoURL
+        ? `<img class="popup-photo" src="${escapeHtml(d.photoURL)}" alt="photo">`
+        : '';
+
+      const popupContent = `
+        ${photoHtml}
+        <b>${escapeHtml(d.name)}</b><br>
+        Принтер: ${escapeHtml(d.printer || '—')}<br>
+        Материалы: ${escapeHtml(d.materials || '—')}<br>
+        Цена: ${escapeHtml(d.price || '—')}<br>
+        Адрес: ${escapeHtml(d.address || '—')}<br>
+        <div class="popup-contacts" style="margin-top:6px">
+          ${waLink ? `<a href="${waLink}" target="_blank" rel="noopener">WhatsApp</a>` : ''}
+          ${tgLink ? `<a href="${tgLink}" target="_blank" rel="noopener">Telegram</a>` : ''}
+          ${igLink ? `<a href="${igLink}" target="_blank" rel="noopener">Instagram</a>` : ''}
+        </div>
+      `;
+
+      const marker = L.marker([d.lat, d.lng]);
+      marker.bindPopup(popupContent);
+      marker.pointData = point;
+      markers.addLayer(marker);
+    });
+
+    applySearchFilter();
+  }, err => {
+    console.error(err);
+    showToast('Ошибка загрузки точек');
+  });
+}
+
+// ===== USER POINTS =====
+function loadUserPoints(uid) {
+  if (unsubscribeUser) unsubscribeUser();
+
+  const container = document.getElementById('user-points');
+  container.innerHTML = '<div style="padding:20px;text-align:center;color:#888">Загрузка...</div>';
+
+  unsubscribeUser = db.collection("3dpoints").where("uid", "==", uid).onSnapshot(snap => {
+    container.innerHTML = '';
+    if (snap.empty) {
+      container.innerHTML = '<div style="padding:20px;text-align:center;color:#888">У вас пока нет точек</div>';
+      return;
+    }
+
+    snap.forEach(doc => {
+      const d = doc.data();
+      const div = document.createElement('div');
+      div.className = 'point-item';
+      div.innerHTML = `
+        <b>${escapeHtml(d.name)}</b>
+        <div style="color:#666;font-size:12px">${escapeHtml(d.address || '')}</div>
+        <div class="point-actions">
+          <button class="edit-btn" onclick="editPoint('${doc.id}')">Изменить</button>
+          <button class="delete-btn" onclick="deletePoint('${doc.id}')">Удалить</button>
+        </div>
+      `;
+      container.appendChild(div);
+    });
+  });
+}
+
+// ===== DELETE / EDIT =====
+window.deletePoint = async (id) => {
+  if (!confirm('Удалить эту точку?')) return;
+  showLoading(true);
+  try {
+    await db.collection("3dpoints").doc(id).delete();
+    showToast('Точка удалена');
+  } catch (e) {
+    showToast('Ошибка удаления: ' + e.message);
+  } finally {
+    showLoading(false);
+  }
+};
+
+window.editPoint = async (id) => {
+  showLoading(true);
+  try {
+    const doc = await db.collection("3dpoints").doc(id).get();
+    if (!doc.exists) {
+      showToast('Точка не найдена');
+      return;
+    }
+    const data = doc.data();
+    if (data.uid !== auth.currentUser?.uid) {
+      showToast('Нет прав');
+      return;
+    }
+    editingId = id;
+    selectedLatLng = L.latLng(data.lat, data.lng);
+    fillForm(data);
+    openModal(true);
+    closePanel();
+  } catch (e) {
+    showToast('Ошибка: ' + e.message);
+  } finally {
+    showLoading(false);
+  }
+};
+
+// ===== VALIDATION =====
+function validateForm() {
+  let ok = true;
+  const name = document.getElementById('f-name').value.trim();
+  const address = document.getElementById('f-address').value.trim();
+
+  if (!name) {
+    document.getElementById('f-name').classList.add('error');
+    document.getElementById('err-name').style.display = 'block';
+    ok = false;
+  } else {
+    document.getElementById('f-name').classList.remove('error');
+    document.getElementById('err-name').style.display = 'none';
+  }
+
+  if (!address) {
+    document.getElementById('f-address').classList.add('error');
+    document.getElementById('err-address').style.display = 'block';
+    ok = false;
+  } else {
+    document.getElementById('f-address').classList.remove('error');
+    document.getElementById('err-address').style.display = 'none';
+  }
+
+  return ok;
+}
+
+// ===== SAVE =====
+document.getElementById('save').onclick = async () => {
+  if (!auth.currentUser) {
+    showToast('Сначала войдите');
+    return;
+  }
+  if (!selectedLatLng && !editingId) {
+    showToast('Сначала выберите место на карте');
+    return;
+  }
+  if (!validateForm()) return;
+
+  showLoading(true);
+
+  try {
+    let photoURL = null;
+    const fileInput = document.getElementById('f-photo');
+    if (fileInput.files && fileInput.files[0]) {
+      const file = fileInput.files[0];
+      if (file.size > 5 * 1024 * 1024) {
+        showToast('Фото слишком большое (макс 5 МБ)');
+        showLoading(false);
+        return;
+      }
+      const ref = storage.ref().child(`points/${auth.currentUser.uid}/${Date.now()}_${file.name}`);
+      await ref.put(file);
+      photoURL = await ref.getDownloadURL();
+    }
+
+    const data = {
+      name: document.getElementById('f-name').value.trim(),
+      printer: document.getElementById('f-printer').value.trim(),
+      materials: document.getElementById('f-materials').value.trim(),
+      price: document.getElementById('f-price').value.trim(),
+      address: document.getElementById('f-address').value.trim(),
+      whatsapp: document.getElementById('no-wa').checked ? null : document.getElementById('f-wa').value.trim() || null,
+      telegram: document.getElementById('no-tg').checked ? null : document.getElementById('f-tg').value.trim() || null,
+      instagram: document.getElementById('no-ig').checked ? null : document.getElementById('f-ig').value.trim() || null,
+      lat: selectedLatLng.lat,
+      lng: selectedLatLng.lng,
+      uid: auth.currentUser.uid,
+      updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+    };
+
+    if (photoURL) data.photoURL = photoURL;
+
+    if (editingId) {
+      // при редактировании не перезаписываем фото, если новое не выбрано
+      if (!photoURL) delete data.photoURL;
+      await db.collection("3dpoints").doc(editingId).update(data);
+      showToast('Точка обновлена');
+    } else {
+      data.createdAt = firebase.firestore.FieldValue.serverTimestamp();
+      await db.collection("3dpoints").add(data);
+      showToast('Точка добавлена');
+    }
+
+    closeModal();
+  } catch (err) {
+    console.error(err);
+    showToast('Ошибка: ' + err.message);
+  } finally {
+    showLoading(false);
+  }
+};
+
+// ===== AUTH =====
+const avatar = document.getElementById('user-avatar');
+
+auth.onAuthStateChanged(user => {
+  if (user) {
+    document.getElementById('add-marker-btn').style.display = 'block';
+    document.getElementById('my-location-btn').style.display = 'block';
+    document.getElementById('logout-btn').style.display = 'block';
+    document.getElementById('search-box').style.display = 'block';
+    document.getElementById('google-btn').style.display = 'none';
+    avatar.src = user.photoURL || 'https://via.placeholder.com/44';
+    avatar.style.display = 'block';
+    loadUserPoints(user.uid);
+  } else {
+    document.getElementById('add-marker-btn').style.display = 'none';
+    document.getElementById('my-location-btn').style.display = 'none';
+    document.getElementById('logout-btn').style.display = 'none';
+    document.getElementById('search-box').style.display = 'none';
+    document.getElementById('google-btn').style.display = 'block';
+    avatar.style.display = 'none';
+    closePanel();
+    if (unsubscribeUser) unsubscribeUser();
+  }
+  loadMarkers();
+});
+
+// Avatar → open panel
+avatar.onclick = () => {
+  if (auth.currentUser) openPanel();
+};
+
+// ===== ADD POINT =====
+document.getElementById('add-marker-btn').onclick = () => {
+  if (!auth.currentUser) {
+    showToast('Сначала войдите');
+    return;
+  }
+  editingId = null;
+  clearForm();
+  document.body.classList.add('selecting-mode');
+  document.getElementById('select-hint').style.display = 'block';
+  showToast('Кликните на карте');
+
+  map.once('click', async (e) => {
+    selectedLatLng = e.latlng;
+    document.body.classList.remove('selecting-mode');
+    document.getElementById('select-hint').style.display = 'none';
+
+    // reverse geocode
+    showLoading(true);
+    const address = await reverseGeocode(e.latlng.lat, e.latlng.lng);
+    document.getElementById('f-address').value = address;
+    showLoading(false);
+
+    openModal(false);
+  });
+};
+
+// ===== MY LOCATION =====
+document.getElementById('my-location-btn').onclick = () => {
+  if (!navigator.geolocation) {
+    showToast('Геолокация не поддерживается');
+    return;
+  }
+  showLoading(true);
+  navigator.geolocation.getCurrentPosition(
+    pos => {
+      const { latitude, longitude } = pos.coords;
+      map.setView([latitude, longitude], 13);
+      L.circleMarker([latitude, longitude], {
+        radius: 8,
+        color: '#4285F4',
+        fillColor: '#4285F4',
+        fillOpacity: 0.7
+      }).addTo(map).bindPopup('Вы здесь').openPopup();
+      showLoading(false);
+    },
+    () => {
+      showToast('Не удалось определить местоположение');
+      showLoading(false);
+    },
+    { enableHighAccuracy: true, timeout: 10000 }
+  );
+};
+
+// ===== SEARCH =====
+document.getElementById('search-box').addEventListener('input', applySearchFilter);
+
+function applySearchFilter() {
+  const q = document.getElementById('search-box').value.trim().toLowerCase();
+  markers.clearLayers();
+
+  allPoints.forEach(d => {
+    if (!d.lat || !d.lng) return;
+    const text = `${d.name || ''} ${d.address || ''} ${d.materials || ''} ${d.printer || ''}`.toLowerCase();
+    if (q && !text.includes(q)) return;
+
+    const waLink = d.whatsapp ? `https://wa.me/${String(d.whatsapp).replace(/[^0-9]/g, '')}` : null;
+    const tgLink = d.telegram ? `https://t.me/${String(d.telegram).replace(/^@/, '')}` : null;
+    const igLink = d.instagram ? `https://www.instagram.com/${String(d.instagram).replace(/^@/, '')}/` : null;
+    const photoHtml = d.photoURL ? `<img class="popup-photo" src="${escapeHtml(d.photoURL)}" alt="photo">` : '';
+
+    const popupContent = `
+      ${photoHtml}
+      <b>${escapeHtml(d.name)}</b><br>
+      Принтер: ${escapeHtml(d.printer || '—')}<br>
+      Материалы: ${escapeHtml(d.materials || '—')}<br>
+      Цена: ${escapeHtml(d.price || '—')}<br>
+      Адрес: ${escapeHtml(d.address || '—')}<br>
+      <div class="popup-contacts" style="margin-top:6px">
+        ${waLink ? `<a href="${waLink}" target="_blank" rel="noopener">WhatsApp</a>` : ''}
+        ${tgLink ? `<a href="${tgLink}" target="_blank" rel="noopener">Telegram</a>` : ''}
+        ${igLink ? `<a href="${igLink}" target="_blank" rel="noopener">Instagram</a>` : ''}
+      </div>
+    `;
+
+    const marker = L.marker([d.lat, d.lng]);
+    marker.bindPopup(popupContent);
+    markers.addLayer(marker);
+  });
+}
+
+// ===== LOGIN / LOGOUT =====
+document.getElementById('google-btn').onclick = () => {
+  auth.signInWithPopup(new firebase.auth.GoogleAuthProvider())
+    .catch(e => showToast('Ошибка входа: ' + e.message));
+};
+document.getElementById('logout-btn').onclick = () => {
+  auth.signOut();
+  showToast('Вы вышли');
+};
+</script>
+</body>
+</html>
