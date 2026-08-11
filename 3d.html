@@ -12,9 +12,7 @@
     --primary: #4285F4;
     --success: #00c853;
     --danger: #d33;
-    --bg: #f8f9fa;
     --text: #222;
-    --radius: 10px;
   }
   * { box-sizing: border-box; }
   body { margin: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif; background: #111; color: var(--text); }
@@ -30,12 +28,7 @@
     gap: 8px;
     max-width: 280px;
   }
-
-/* Когда открыта панель "Мои точки" — прячем кнопки слева */
-body.panel-open .controls {
-  display: none;
-}
-  button, .btn {
+  button {
     padding: 10px 14px;
     border: none;
     border-radius: 8px;
@@ -43,13 +36,16 @@ body.panel-open .controls {
     font-weight: 600;
     font-size: 14px;
     box-shadow: 0 2px 8px rgba(0,0,0,.15);
-    transition: transform .15s, opacity .15s;
+    transition: transform .15s;
   }
   button:active { transform: scale(0.97); }
+
   #google-btn { background: var(--primary); color: #fff; }
   #add-marker-btn { background: var(--success); color: #fff; display: none; }
+  #my-points-btn { background: #5c6bc0; color: #fff; display: none; }
   #my-location-btn { background: #fff; color: #333; display: none; }
   #logout-btn { background: var(--danger); color: #fff; display: none; }
+
   #search-box {
     display: none;
     padding: 10px 12px;
@@ -69,6 +65,7 @@ body.panel-open .controls {
     display: none;
   }
 
+  /* Side panel */
   #side-panel {
     position: fixed;
     top: 0; right: 0;
@@ -94,7 +91,13 @@ body.panel-open .controls {
     align-items: center;
   }
   .panel-header h3 { margin: 0; font-size: 16px; }
-  .panel-close { background: transparent; color: #fff; font-size: 22px; padding: 0 8px; box-shadow: none; }
+  .panel-close {
+    background: transparent;
+    color: #fff;
+    font-size: 22px;
+    padding: 0 8px;
+    box-shadow: none;
+  }
   #user-points { flex: 1; overflow-y: auto; padding: 12px; }
   .point-item {
     border: 1px solid #eee;
@@ -110,6 +113,7 @@ body.panel-open .controls {
   .edit-btn { background: #ff9800; color: #fff; }
   .delete-btn { background: var(--danger); color: #fff; }
 
+  /* Modal */
   #modal {
     position: fixed; inset: 0;
     background: rgba(0,0,0,.55);
@@ -146,6 +150,7 @@ body.panel-open .controls {
   #save { background: var(--success); color: #fff; }
   .cancel-btn { background: #9e9e9e; color: #fff; }
 
+  /* Loading & Toast */
   #loading {
     position: fixed; inset: 0;
     background: rgba(255,255,255,.7);
@@ -202,8 +207,9 @@ body.panel-open .controls {
 
 <div class="controls">
   <button id="google-btn">Войти через Google</button>
-  <img id="user-avatar" src="" title="Мои точки" alt="avatar">
+  <img id="user-avatar" src="" title="Профиль" alt="avatar">
   <button id="add-marker-btn">＋ Добавить точку</button>
+  <button id="my-points-btn">📋 Мои точки</button>
   <button id="my-location-btn">📍 Моё местоположение</button>
   <input type="text" id="search-box" placeholder="Поиск по названию, адресу, материалам...">
   <button id="logout-btn">Выйти</button>
@@ -287,8 +293,7 @@ const map = L.map('map', {
   minZoom: 5,
   maxZoom: 18,
   center: [48.5, 68],
-  zoom: 6,
-  zoomControl: false
+  zoom: 6
 });
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
   attribution: '© OpenStreetMap',
@@ -329,12 +334,9 @@ function showLoading(show) {
 
 function openPanel() {
   document.getElementById('side-panel').classList.add('open');
-  document.body.classList.add('panel-open');   // прячем кнопки
 }
-
 function closePanel() {
   document.getElementById('side-panel').classList.remove('open');
-  document.body.classList.remove('panel-open'); // возвращаем кнопки
 }
 
 // ===== MODAL =====
@@ -436,7 +438,6 @@ function loadMarkers() {
 
       const marker = L.marker([d.lat, d.lng]);
       marker.bindPopup(popupContent);
-      marker.pointData = point;
       markers.addLayer(marker);
     });
 
@@ -598,6 +599,7 @@ const avatar = document.getElementById('user-avatar');
 auth.onAuthStateChanged(user => {
   if (user) {
     document.getElementById('add-marker-btn').style.display = 'block';
+    document.getElementById('my-points-btn').style.display = 'block';
     document.getElementById('my-location-btn').style.display = 'block';
     document.getElementById('logout-btn').style.display = 'block';
     document.getElementById('search-box').style.display = 'block';
@@ -607,6 +609,7 @@ auth.onAuthStateChanged(user => {
     loadUserPoints(user.uid);
   } else {
     document.getElementById('add-marker-btn').style.display = 'none';
+    document.getElementById('my-points-btn').style.display = 'none';
     document.getElementById('my-location-btn').style.display = 'none';
     document.getElementById('logout-btn').style.display = 'none';
     document.getElementById('search-box').style.display = 'none';
@@ -618,9 +621,14 @@ auth.onAuthStateChanged(user => {
   loadMarkers();
 });
 
-// Avatar → open panel
+// Avatar click
 avatar.onclick = () => {
   if (auth.currentUser) openPanel();
+};
+
+// Кнопка "Мои точки"
+document.getElementById('my-points-btn').onclick = () => {
+  openPanel();
 };
 
 // ===== ADD POINT =====
