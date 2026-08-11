@@ -27,6 +27,14 @@
     flex-direction: column;
     gap: 8px;
     max-width: 280px;
+    transition: opacity 0.25s, visibility 0.25s;
+  }
+
+/* Когда панель открыта — прячем кнопки */
+  body.panel-open .controls {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
   }
   button {
     padding: 10px 14px;
@@ -334,9 +342,12 @@ function showLoading(show) {
 
 function openPanel() {
   document.getElementById('side-panel').classList.add('open');
+  document.body.classList.add('panel-open');
 }
+
 function closePanel() {
   document.getElementById('side-panel').classList.remove('open');
+  document.body.classList.remove('panel-open');
 }
 
 // ===== MODAL =====
